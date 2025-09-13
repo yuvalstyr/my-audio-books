@@ -121,9 +121,6 @@ export const bookActions = {
             queuePosition: bookInput.queuePosition,
             tags: bookInput.tags || [],
             dateAdded: new Date(),
-            dateUpdated: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
         };
 
         // Add optimistic book immediately

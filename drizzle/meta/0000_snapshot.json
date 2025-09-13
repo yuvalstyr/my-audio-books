@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9174dd8c-6694-4166-976b-f3da9a94d15e",
+  "id": "92694156-9ef1-471d-b413-b12095c87186",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "book_tags": {
@@ -22,7 +22,22 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "book_tags_book_id_idx": {
+          "name": "book_tags_book_id_idx",
+          "columns": [
+            "book_id"
+          ],
+          "isUnique": false
+        },
+        "book_tags_tag_id_idx": {
+          "name": "book_tags_tag_id_idx",
+          "columns": [
+            "tag_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "book_tags_book_id_books_id_fk": {
           "name": "book_tags_book_id_books_id_fk",
@@ -135,30 +150,62 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "date_updated": {
-          "name": "date_updated",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "books_title_idx": {
+          "name": "books_title_idx",
+          "columns": [
+            "title"
+          ],
+          "isUnique": false
+        },
+        "books_author_idx": {
+          "name": "books_author_idx",
+          "columns": [
+            "author"
+          ],
+          "isUnique": false
+        },
+        "books_date_added_idx": {
+          "name": "books_date_added_idx",
+          "columns": [
+            "date_added"
+          ],
+          "isUnique": false
+        },
+        "books_queue_position_idx": {
+          "name": "books_queue_position_idx",
+          "columns": [
+            "queue_position"
+          ],
+          "isUnique": false
+        },
+        "books_title_author_idx": {
+          "name": "books_title_author_idx",
+          "columns": [
+            "title",
+            "author"
+          ],
+          "isUnique": false
+        },
+        "books_date_added_title_idx": {
+          "name": "books_date_added_title_idx",
+          "columns": [
+            "date_added",
+            "title"
+          ],
+          "isUnique": false
+        },
+        "books_rated_idx": {
+          "name": "books_rated_idx",
+          "columns": [
+            "narrator_rating"
+          ],
+          "isUnique": false,
+          "where": "narrator_rating IS NOT NULL"
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -203,6 +250,13 @@
             "name"
           ],
           "isUnique": true
+        },
+        "tags_created_at_idx": {
+          "name": "tags_created_at_idx",
+          "columns": [
+            "created_at"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {},

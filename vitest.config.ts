@@ -6,6 +6,10 @@ export default defineConfig({
     test: {
         include: ['src/**/*.{test,spec}.{js,ts}'],
         environment: 'jsdom',
+        setupFiles: ['src/test-setup.ts'],
+        typecheck: {
+            include: ['src/**/*.{test,spec}.{js,ts}']
+        },
         coverage: {
             provider: 'v8',
             reporter: ['text', 'json', 'html', 'lcov'],
@@ -14,7 +18,6 @@ export default defineConfig({
                 'src/**/*.test.{js,ts}',
                 'src/**/*.spec.{js,ts}',
                 'src/**/__tests__/**',
-                'src/lib/services/examples/**',
                 'src/app.html'
             ],
             thresholds: {

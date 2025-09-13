@@ -12,20 +12,15 @@ export const books = sqliteTable('books', {
     coverImageUrl: text('cover_image_url'),
     queuePosition: integer('queue_position'),
     dateAdded: text('date_added').notNull(),
-    dateUpdated: text('date_updated').notNull(),
-    createdAt: text('created_at').notNull(),
-    updatedAt: text('updated_at').notNull(),
 }, (table) => ({
     // Performance indexes for common queries
     titleIdx: index('books_title_idx').on(table.title),
     authorIdx: index('books_author_idx').on(table.author),
     dateAddedIdx: index('books_date_added_idx').on(table.dateAdded),
     queuePositionIdx: index('books_queue_position_idx').on(table.queuePosition),
-    createdAtIdx: index('books_created_at_idx').on(table.createdAt),
-    updatedAtIdx: index('books_updated_at_idx').on(table.updatedAt),
     // Composite indexes for common query patterns
     titleAuthorIdx: index('books_title_author_idx').on(table.title, table.author),
-    createdAtTitleIdx: index('books_created_at_title_idx').on(table.createdAt, table.title),
+    dateAddedTitleIdx: index('books_date_added_title_idx').on(table.dateAdded, table.title),
     // Partial indexes for performance
     ratedBooksIdx: index('books_rated_idx').on(table.narratorRating).where(sql`narrator_rating IS NOT NULL`),
 }));

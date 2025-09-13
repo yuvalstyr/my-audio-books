@@ -52,9 +52,9 @@ export class ErrorLogger {
     /**
      * Log debug message (only in development)
      */
-    static debug(message: string, context?: string): void {
+    static debug(message: string, context?: string, additionalData?: any): void {
         if (this.isDevelopment) {
-            this.log('debug', message, undefined, context);
+            this.log('debug', message, undefined, context, additionalData);
         }
     }
 
@@ -127,7 +127,7 @@ export class ErrorLogger {
 
         const logArgs = [fullMessage];
         if (entry.error) {
-            logArgs.push(entry.error);
+            logArgs.push(entry.error.toString());
         }
         if (entry.additionalData) {
             logArgs.push('Additional Data:', entry.additionalData);

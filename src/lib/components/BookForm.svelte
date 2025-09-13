@@ -232,7 +232,7 @@
     /**
      * Handles Audible URL input changes with debounced parsing
      */
-    let parseTimeout: number;
+    let parseTimeout: ReturnType<typeof setTimeout>;
     function handleAudibleUrlChange() {
         // Clear any existing timeout
         if (parseTimeout) {

@@ -285,8 +285,7 @@
                     ErrorLogger.debug(
                         "Performance metrics loaded",
                         "WishlistPage.preloadPerformance",
-                        undefined,
-                        { metrics: data.data },
+                        { metrics: data.data }
                     );
                 }
             })

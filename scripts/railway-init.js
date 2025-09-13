@@ -81,12 +81,16 @@ function runMigrations() {
     console.log('🔄 Running database migrations...');
 
     try {
-        // First, try to generate any pending migrations
-        try {
-            execSync('npm run db:generate', { stdio: 'pipe' });
-            console.log('📋 Migration generation completed');
-        } catch (genError) {
-            console.log('ℹ️  No new migrations to generate (this is normal)');
+        // Skip generation in production - migrations should be pre-generated
+        if (process.env.NODE_ENV !== 'production') {
+            try {
+                execSync('npm run db:generate', { stdio: 'pipe' });
+                console.log('📋 Migration generation completed');
+            } catch (genError) {
+                console.log('ℹ️  No new migrations to generate (this is normal)');
+            }
+        } else {
+            console.log('🏭 Production mode: using pre-generated migrations');
         }
 
         // Run the migrations
