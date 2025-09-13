@@ -19,6 +19,10 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Set environment variables for SvelteKit
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
 # Expose port
 EXPOSE 3000
 

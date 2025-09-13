@@ -14,7 +14,9 @@
         "production": {
             "variables": {
                 "NODE_ENV": "production",
-                "DATABASE_PATH": "$RAILWAY_VOLUME_MOUNT_PATH/audiobook-wishlist.db"
+                "DATABASE_PATH": "$RAILWAY_VOLUME_MOUNT_PATH/audiobook-wishlist.db",
+                "HOST": "0.0.0.0",
+                "PORT": "3000"
             }
         }
     }
