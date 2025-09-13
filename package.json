@@ -6,11 +6,11 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "npm run build:clean && npm run build:app && npm run railway:init",
+		"build": "npm run build:clean && npm run build:app",
 		"build:clean": "rm -rf build",
 		"build:app": "vite build",
 		"build:production": "NODE_ENV=production npm run build",
-		"start": "NODE_ENV=production node build",
+		"start": "npm run railway:init && NODE_ENV=production node build",
 		"preview": "vite preview",
 		"postinstall": "svelte-kit sync || echo 'SvelteKit sync skipped'",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

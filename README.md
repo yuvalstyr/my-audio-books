@@ -162,7 +162,6 @@ npm run check:watch       # Type checking in watch mode
 
 # Deployment
 npm run railway:init      # Initialize Railway deployment
-npm run test:deployment   # Test deployment configuration
 npm run verify:deployment # Verify deployment health
 ```
 
@@ -456,9 +455,6 @@ npm run test:run src/lib/components/__tests__/BookCard.test.ts
 ```sh
 # Test build locally
 npm run build:production
-
-# Check deployment configuration
-npm run test:deployment
 
 # Verify health endpoint
 curl https://your-app.railway.app/api/health
