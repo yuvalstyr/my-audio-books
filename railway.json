@@ -1,0 +1,22 @@
+{
+    "$schema": "https://railway.app/railway.schema.json",
+    "build": {
+        "builder": "NIXPACKS",
+        "buildCommand": "npm ci && npm run build"
+    },
+    "deploy": {
+        "startCommand": "npm run start",
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "healthcheckPath": "/api/health",
+        "healthcheckTimeout": 300
+    },
+    "environments": {
+        "production": {
+            "variables": {
+                "NODE_ENV": "production",
+                "DATABASE_PATH": "$RAILWAY_VOLUME_MOUNT_PATH/audiobook-wishlist.db"
+            }
+        }
+    }
+}

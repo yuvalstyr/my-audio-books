@@ -1,0 +1,132 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run type checking
+      run: npm run check
+    
+    - name: Run unit tests
+      run: npm run test:run
+      env:
+        NODE_ENV: test
+    
+    - name: Run API integration tests
+      run: npm run test:run -- src/routes/api/__tests__/
+      env:
+        NODE_ENV: test
+    
+    - name: Generate test coverage
+      run: npm run test:run -- --coverage
+      env:
+        NODE_ENV: test
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: api-tests
+        name: api-coverage
+        fail_ci_if_error: false
+
+  database-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run database migration tests
+      run: npm run db:push
+      env:
+        NODE_ENV: test
+    
+    - name: Run database operation tests
+      run: npm run test:run -- src/routes/api/__tests__/comprehensive-api.test.ts
+      env:
+        NODE_ENV: test
+    
+    - name: Test database cleanup
+      run: npm run test:run -- src/routes/api/__tests__/integration.test.ts
+      env:
+        NODE_ENV: test
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run performance tests
+      run: npm run test:run -- src/routes/api/__tests__/edge-cases.test.ts
+      env:
+        NODE_ENV: test
+    
+    - name: Check memory usage
+      run: |
+        npm run test:run -- --reporter=verbose src/routes/api/__tests__/edge-cases.test.ts 2>&1 | \
+        grep -E "(memory|heap|performance)" || true
+
+  security-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security-focused tests
+      run: npm run test:run -- --grep "SQL injection|XSS|validation" src/routes/api/__tests__/
+      env:
+        NODE_ENV: test
+    
+    - name: Check for security vulnerabilities
+      run: npm audit --audit-level moderate
+      continue-on-error: true
