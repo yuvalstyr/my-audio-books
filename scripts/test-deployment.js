@@ -86,7 +86,7 @@ async function runTests() {
     if (!updateBook.success) return false;
 
     // Test DELETE /api/books/[id]
-    const deleteBook = await testEndpoint('DELETE', `/api/books/${bookId}`, null, 204);
+    const deleteBook = await testEndpoint('DELETE', `/api/books/${bookId}`, null, 200);
     if (!deleteBook.success) return false;
 
     console.log('\n🏷️  Testing Tags API...');
