@@ -21,9 +21,8 @@ RUN npm run build
 
 # Set environment variables for SvelteKit
 ENV HOST=0.0.0.0
-ENV PORT=3000
 
-# Expose port
+# Expose port (Railway will override this)
 EXPOSE 3000
 
 # Start the application

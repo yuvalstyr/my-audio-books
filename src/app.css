@@ -86,3 +86,102 @@ html {
 * {
     -webkit-overflow-scrolling: touch;
 }
+
+/* Enhanced contrast for better component separation in dim theme */
+
+/* Navbar - make it stand out from background */
+.navbar {
+    background-color: #2a323c !important;
+    border-bottom: 1px solid #374151;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Cards - give them more contrast */
+.card {
+    background-color: #2a323c !important;
+    border: 1px solid #374151;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Alert boxes */
+.alert {
+    background-color: #2a323c !important;
+    border: 1px solid #374151;
+}
+
+/* Input fields and search bars */
+.input,
+.textarea,
+.select {
+    background-color: #1f2937 !important;
+    border: 1px solid #374151;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+    background-color: #1f2937 !important;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+/* Dropdown menus */
+.dropdown-content,
+.modal-box {
+    background-color: #2a323c !important;
+    border: 1px solid #374151;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Button improvements */
+.btn {
+    border: 1px solid #374151;
+}
+
+.btn-ghost:hover {
+    background-color: #374151 !important;
+}
+
+.btn-outline {
+    border-color: #374151;
+}
+
+.btn-outline:hover {
+    background-color: #374151 !important;
+}
+
+/* Menu items */
+.menu li>*:hover {
+    background-color: #374151 !important;
+}
+
+/* Badge styling */
+.badge {
+    border: 1px solid #374151;
+}
+
+.badge-outline {
+    background-color: transparent;
+    border-color: #6b7280;
+}
+
+/* Context indicator section */
+.bg-base-100 {
+    background-color: #1f2937 !important;
+}
+
+.bg-base-200 {
+    background-color: #2a323c !important;
+}
+
+.border-base-200,
+.border-base-300 {
+    border-color: #374151 !important;
+}
+
+/* Empty state cards */
+.card.bg-base-200 {
+    background-color: #2a323c !important;
+    border: 1px solid #374151;
+}
