@@ -95,9 +95,28 @@ export { sqlite };
 // Database health monitoring
 export function getDatabaseHealth() {
     try {
+        // First, verify the database exists and is accessible with a simple query
+        const testResult = sqlite.prepare('SELECT 1 as test').get();
+        if (!testResult) {
+            throw new Error('Database test query failed');
+        }
+
+        // Only run PRAGMA statements if basic connectivity works
         const stats = sqlite.prepare('PRAGMA database_list').all();
-        const walInfo = sqlite.prepare('PRAGMA wal_checkpoint').get();
-        const cacheInfo = sqlite.prepare('PRAGMA cache_size').get();
+
+        // Try PRAGMA statements with fallbacks
+        let walInfo, cacheInfo;
+        try {
+            walInfo = sqlite.prepare('PRAGMA wal_checkpoint').get();
+        } catch {
+            walInfo = { error: 'WAL checkpoint not available' };
+        }
+
+        try {
+            cacheInfo = sqlite.prepare('PRAGMA cache_size').get();
+        } catch {
+            cacheInfo = { error: 'Cache info not available' };
+        }
 
         return {
             isHealthy: true,

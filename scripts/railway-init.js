@@ -125,8 +125,26 @@ async function verifyDatabase(dbPath) {
             const { statSync } = await import('fs');
             const stats = statSync(dbPath);
             console.log(`📊 Database size: ${Math.round(stats.size / 1024)} KB`);
+
+            // Try to verify database is accessible with SQLite
+            try {
+                const Database = (await import('better-sqlite3')).default;
+                const db = new Database(dbPath, { readonly: true });
+
+                // Test basic functionality
+                const result = db.prepare('SELECT 1 as test').get();
+                if (result && result.test === 1) {
+                    console.log('✅ Database connectivity verified');
+                } else {
+                    console.log('⚠️  Database test query failed');
+                }
+
+                db.close();
+            } catch (sqliteError) {
+                console.log(`⚠️  Database verification error: ${sqliteError.message}`);
+            }
         } catch (error) {
-            console.log('⚠️  Could not read database stats');
+            console.log('⚠️  Could not read database stats:', error.message);
         }
     } else {
         console.log('⚠️  Database file not found, it will be created on first use');

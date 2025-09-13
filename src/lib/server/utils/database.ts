@@ -244,9 +244,17 @@ export async function validateDatabaseConnection(): Promise<boolean> {
     try {
         // Simple query to test connection - just select 1
         const result = await db.select({ test: sql`1 as test` });
-        return Array.isArray(result);
+        return Array.isArray(result) && result.length > 0;
     } catch (error) {
-        ServerLogger.error('Database connection validation failed', error as Error, 'DATABASE_HEALTH');
+        const errorMessage = (error as Error).message;
+
+        // Log specific error types for debugging
+        if (errorMessage.includes('no such table') || errorMessage.includes('database is locked')) {
+            ServerLogger.warn(`Database validation warning: ${errorMessage}`, 'DATABASE_HEALTH');
+        } else {
+            ServerLogger.error('Database connection validation failed', error as Error, 'DATABASE_HEALTH');
+        }
+
         return false;
     }
 }
@@ -273,6 +281,7 @@ export async function getDatabaseStats(): Promise<{
 
         try {
             // Try to count books and tags tables (main tables we care about)
+            // Check if tables exist first
             const bookCountResult = await db.select({ count: sql<number>`count(*)` }).from(books);
             const tagCountResult = await db.select({ count: sql<number>`count(*)` }).from(tags);
 
@@ -281,8 +290,27 @@ export async function getDatabaseStats(): Promise<{
             totalRecords = bookCount + tagCount;
             tableCount = 2; // We know we have books and tags tables
         } catch (error) {
-            // If we can't count records, at least we know the connection works
-            ServerLogger.warn('Could not get table statistics', 'DATABASE_HEALTH', undefined, { error: (error as Error).message });
+            const errorMessage = (error as Error).message;
+
+            // Handle specific "no such table" errors gracefully
+            if (errorMessage.includes('no such table')) {
+                ServerLogger.info('Database tables not yet created (normal during initialization)', 'DATABASE_HEALTH');
+                return {
+                    isConnected: true,
+                    tableCount: 0,
+                    totalRecords: 0,
+                    error: 'Tables not yet created'
+                };
+            } else {
+                // Other errors are more concerning
+                ServerLogger.warn('Could not get table statistics', 'DATABASE_HEALTH', undefined, { error: errorMessage });
+                return {
+                    isConnected: true,
+                    tableCount: 0,
+                    totalRecords: 0,
+                    error: errorMessage
+                };
+            }
         }
 
         return {
