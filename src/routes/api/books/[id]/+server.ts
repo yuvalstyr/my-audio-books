@@ -58,7 +58,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
                     coverImageUrl: books.coverImageUrl,
                     queuePosition: books.queuePosition,
                     dateAdded: books.dateAdded,
-                    dateAdded: books.dateAdded,
+                    highlyRatedFor: books.highlyRatedFor,
                     tagId: tags.id,
                     tagName: tags.name,
                     tagColor: tags.color
@@ -98,6 +98,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
             coverImageUrl: bookWithTags[0].coverImageUrl,
             queuePosition: bookWithTags[0].queuePosition,
             dateAdded: new Date(bookWithTags[0].dateAdded),
+            highlyRatedFor: bookWithTags[0].highlyRatedFor,
             tags: bookWithTags
                 .filter(row => row.tagId)
                 .map(row => ({
@@ -210,6 +211,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
             if (input.description !== undefined) updateData.description = input.description?.trim() || null;
             if (input.coverImageUrl !== undefined) updateData.coverImageUrl = input.coverImageUrl?.trim() || null;
             if (input.queuePosition !== undefined) updateData.queuePosition = input.queuePosition;
+            if (input.highlyRatedFor !== undefined) updateData.highlyRatedFor = input.highlyRatedFor?.trim() || null;
 
             // Update the book
             tx.update(books).set(updateData).where(eq(books.id, id)).run();
@@ -238,6 +240,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
                                 id: tag.id,
                                 name: tag.name,
                                 color: tag.color,
+                                createdAt: now,
                             }).run();
                         } else {
                             tagId = existingTag[0].id;
@@ -269,7 +272,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
                     coverImageUrl: books.coverImageUrl,
                     queuePosition: books.queuePosition,
                     dateAdded: books.dateAdded,
-                    dateAdded: books.dateAdded,
+                    highlyRatedFor: books.highlyRatedFor,
                     tagId: tags.id,
                     tagName: tags.name,
                     tagColor: tags.color
@@ -292,7 +295,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
                 coverImageUrl: updatedBookWithTags[0].coverImageUrl,
                 queuePosition: updatedBookWithTags[0].queuePosition,
                 dateAdded: new Date(updatedBookWithTags[0].dateAdded),
-                dateAdded: new Date(updatedBookWithTags[0].dateAdded),
+                highlyRatedFor: updatedBookWithTags[0].highlyRatedFor,
                 tags: updatedBookWithTags
                     .filter(row => row.tagId)
                     .map(row => ({

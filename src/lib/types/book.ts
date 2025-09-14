@@ -14,6 +14,7 @@ export interface Book {
     queuePosition?: number;
     coverImageUrl?: string;
     description?: string;
+    highlyRatedFor?: string;
 }
 
 export interface BookTag {
@@ -51,6 +52,7 @@ export interface CreateBookInput {
     queuePosition?: number;
     coverImageUrl?: string;
     description?: string;
+    highlyRatedFor?: string;
 }
 
 // Type for updating an existing book

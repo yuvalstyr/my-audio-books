@@ -1,15 +1,15 @@
 <script lang="ts">
 	import "../app.css";
 	import { page } from "$app/stores";
-	// import { ImportExport } from "$lib/components"; // Temporarily disabled during API migration
+	import { ImportExport } from "$lib/components";
 	import PWAInstaller from "$lib/components/PWAInstaller.svelte";
 
-	// import type { ImportResult } from "$lib/services/import-export"; // Temporarily disabled during API migration
+	import type { ImportResult } from "$lib/services/import-export";
 
 	let { children } = $props();
 
-	// Import/Export modal state - temporarily disabled during API migration
-	// let showImportExport = $state(false);
+	// Import/Export modal state
+	let showImportExport = $state(false);
 
 	// Navigation state
 	const currentPath = $derived($page.url.pathname);
@@ -17,27 +17,27 @@
 	const isWishlistPage = $derived(currentPath === "/wishlist");
 
 	/**
-	 * Open import/export modal - temporarily disabled during API migration
+	 * Open import/export modal
 	 */
 	function openImportExportModal() {
-		// showImportExport = true;
-		console.log("Import/Export temporarily disabled during API migration");
+		showImportExport = true;
 	}
 
 	/**
-	 * Close import/export modal - temporarily disabled during API migration
+	 * Close import/export modal
 	 */
 	function closeImportExportModal() {
-		// showImportExport = false;
+		showImportExport = false;
 	}
 
 	/**
-	 * Handle successful data import - temporarily disabled during API migration
+	 * Handle successful data import
 	 */
 	function handleDataImported(event: any) {
-		// The import was successful, we could show a toast notification here
-		// or trigger a page refresh if needed
+		// The import was successful, we could refresh the page or show a notification
 		console.log("Data imported successfully:", event.detail.result);
+		// Optionally refresh the page to show new data
+		window.location.reload();
 	}
 
 	/**
@@ -192,10 +192,6 @@
 							>
 								<span class="text-lg">⚙️</span>
 								<span>Settings</span>
-								<span
-									class="text-xs text-base-content/50 ml-auto"
-									>Soon</span
-								>
 							</button>
 						</li>
 					</ul>
@@ -205,7 +201,7 @@
 				<button
 					class="btn btn-ghost btn-sm gap-2 hover:bg-base-300 transition-colors hidden lg:flex"
 					onclick={openImportExportModal}
-					title="Settings (Coming Soon)"
+					title="Import/Export Settings"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -324,12 +320,12 @@
 		{@render children?.()}
 	</main>
 
-	<!-- Import/Export Modal - temporarily disabled during API migration -->
-	<!-- <ImportExport
+	<!-- Import/Export Modal -->
+	<ImportExport
 		isOpen={showImportExport}
 		on:close={closeImportExportModal}
 		on:dataImported={handleDataImported}
-	/> -->
+	/>
 
 	<!-- PWA Installer -->
 	<PWAInstaller />

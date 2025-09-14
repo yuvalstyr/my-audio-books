@@ -29,6 +29,7 @@
     let narratorRating: number | undefined = undefined;
     let performanceRating: number | undefined = undefined;
     let description = "";
+    let highlyRatedFor = "";
     let selectedTags: Set<string> = new Set();
 
     // Validation state
@@ -73,6 +74,7 @@
             narratorRating = book.narratorRating;
             performanceRating = book.performanceRating;
             description = book.description || "";
+            highlyRatedFor = book.highlyRatedFor || "";
             selectedTags = new Set(book.tags.map((tag) => tag.name));
         } else {
             // Add mode - reset form
@@ -83,6 +85,7 @@
             narratorRating = undefined;
             performanceRating = undefined;
             description = "";
+            highlyRatedFor = "";
             selectedTags = new Set();
         }
         errors = {};
@@ -275,6 +278,7 @@
                         ? performanceRating
                         : undefined,
                 description: description.trim() || undefined,
+                highlyRatedFor: highlyRatedFor.trim() || undefined,
                 tags: tags.length > 0 ? tags : undefined,
             };
 
@@ -671,6 +675,25 @@
                         placeholder="Add a personal note or description..."
                         disabled={isSubmitting}
                     ></textarea>
+                </div>
+
+                <!-- Highly Rated For Field -->
+                <div class="form-control">
+                    <label class="label" for="highlyRatedFor">
+                        <span class="label-text font-medium">Highly rated for</span>
+                        <span class="label-text-alt">Optional</span>
+                    </label>
+                    <input
+                        id="highlyRatedFor"
+                        type="text"
+                        bind:value={highlyRatedFor}
+                        class="input input-bordered w-full"
+                        placeholder="e.g. Conversational Storytelling • Relatable Personal Anecdotes • Authentic Narration"
+                        disabled={isSubmitting}
+                    />
+                    <div class="label">
+                        <span class="label-text-alt text-xs">Separate multiple items with • (bullet point)</span>
+                    </div>
                 </div>
 
                 <!-- Form Actions -->

@@ -42,6 +42,11 @@
     return tagColors[tagName] || "badge-neutral";
   }
 
+  function formatHighlyRatedFor(highlyRatedFor?: string): string[] {
+    if (!highlyRatedFor?.trim()) return [];
+    return highlyRatedFor.split('•').map(item => item.trim()).filter(item => item.length > 0);
+  }
+
   $: hasNextTag = book.tags.some((tag) => tag.name === "next");
 </script>
 
@@ -143,6 +148,21 @@
           </div>
         {/if}
       </div>
+    </div>
+
+    <!-- Highly Rated For -->
+    <div class="mb-3 flex-shrink-0 min-h-[2.5rem]">
+      {#if book.highlyRatedFor && formatHighlyRatedFor(book.highlyRatedFor).length > 0}
+        <div class="text-xs text-base-content/60 mb-1">Highly rated for:</div>
+        <div class="text-xs text-base-content/80">
+          {#each formatHighlyRatedFor(book.highlyRatedFor) as item, index}
+            <span class="inline-flex items-center">
+              <span class="w-1 h-1 bg-base-content/40 rounded-full mr-1.5"></span>
+              {item}{#if index < formatHighlyRatedFor(book.highlyRatedFor).length - 1}<span class="mx-1">•</span>{/if}
+            </span>
+          {/each}
+        </div>
+      {/if}
     </div>
 
     <!-- Tags -->

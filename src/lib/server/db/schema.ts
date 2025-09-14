@@ -12,6 +12,7 @@ export const books = sqliteTable('books', {
     coverImageUrl: text('cover_image_url'),
     queuePosition: integer('queue_position'),
     dateAdded: text('date_added').notNull(),
+    highlyRatedFor: text('highly_rated_for'),
 }, (table) => ({
     // Performance indexes for common queries
     titleIdx: index('books_title_idx').on(table.title),

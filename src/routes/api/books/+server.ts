@@ -52,6 +52,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
                 coverImageUrl: books.coverImageUrl,
                 queuePosition: books.queuePosition,
                 dateAdded: books.dateAdded,
+                highlyRatedFor: books.highlyRatedFor,
                 tagId: tags.id,
                 tagName: tags.name,
                 tagColor: tags.color
@@ -94,6 +95,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
                     coverImageUrl: row.coverImageUrl,
                     queuePosition: row.queuePosition,
                     dateAdded: new Date(row.dateAdded),
+                    highlyRatedFor: row.highlyRatedFor,
                     tags: []
                 });
             }
@@ -210,7 +212,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 coverImageUrl: input.coverImageUrl?.trim() || null,
                 queuePosition: input.queuePosition || null,
                 dateAdded: now,
-                dateAdded: now
+                highlyRatedFor: input.highlyRatedFor?.trim() || null
             }).run();
 
             // Handle tags if provided
@@ -232,6 +234,7 @@ export const POST: RequestHandler = async ({ request }) => {
                             id: tag.id,
                             name: tag.name,
                             color: tag.color,
+                            createdAt: now,
                         }).run();
                     } else {
                         tagId = existingTag[0].id;
@@ -262,7 +265,7 @@ export const POST: RequestHandler = async ({ request }) => {
                     coverImageUrl: books.coverImageUrl,
                     queuePosition: books.queuePosition,
                     dateAdded: books.dateAdded,
-                    dateAdded: books.dateAdded,
+                    highlyRatedFor: books.highlyRatedFor,
                     tagId: tags.id,
                     tagName: tags.name,
                     tagColor: tags.color
@@ -289,6 +292,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 coverImageUrl: createdBookWithTags[0].coverImageUrl,
                 queuePosition: createdBookWithTags[0].queuePosition,
                 dateAdded: new Date(createdBookWithTags[0].dateAdded),
+                highlyRatedFor: createdBookWithTags[0].highlyRatedFor,
                 tags: createdBookWithTags
                     .filter(row => row.tagId)
                     .map(row => ({

@@ -30,8 +30,10 @@ export function isValidId(id: string): boolean {
     const timestampPattern = /^\d{13}-[a-z0-9]{6}$/;
     // Check for simple randomString format (for tags)
     const simplePattern = /^[a-z0-9]{6}$/;
+    // Check for legacy format (book-number or other existing formats)
+    const legacyPattern = /^[a-zA-Z0-9-_]+$/;
 
-    return timestampPattern.test(id) || simplePattern.test(id);
+    return timestampPattern.test(id) || simplePattern.test(id) || (legacyPattern.test(id) && id.length >= 3);
 }
 
 /**
