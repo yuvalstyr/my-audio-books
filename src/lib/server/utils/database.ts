@@ -242,9 +242,9 @@ export async function executeWithRetry<T>(
  */
 export async function validateDatabaseConnection(): Promise<boolean> {
     try {
-        // Simple query to test connection - just select 1
-        const result = await db.select({ test: sql`1 as test` });
-        return Array.isArray(result) && result.length > 0;
+        // Simple query to test connection - use the exact pattern from working code
+        await db.select().from(books).limit(1);
+        return true;
     } catch (error) {
         const errorMessage = (error as Error).message;
 

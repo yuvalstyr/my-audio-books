@@ -43,8 +43,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
         const memoryUsage = process.memoryUsage();
         const uptime = process.uptime();
 
-        // Determine overall health status - be more lenient
-        const isHealthy = true; // Always report healthy for basic health check
+        // Determine overall health status based on database connection
+        const isHealthy = dbConnected && dbStats.isConnected;
         const responseTime = Date.now() - startTime;
 
         const healthData = {
