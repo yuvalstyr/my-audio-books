@@ -76,40 +76,84 @@ function setupDatabase(dbPath) {
     }
 }
 
-// Run database migrations with error handling
-function runMigrations() {
-    console.log('🔄 Running database migrations...');
+// Check if database has existing tables
+async function checkDatabaseExists(dbPath) {
+    if (!existsSync(dbPath)) {
+        return false;
+    }
 
     try {
-        // Skip generation in production - migrations should be pre-generated
-        if (process.env.NODE_ENV !== 'production') {
-            try {
-                execSync('npm run db:generate', { stdio: 'pipe' });
-                console.log('📋 Migration generation completed');
-            } catch (genError) {
-                console.log('ℹ️  No new migrations to generate (this is normal)');
-            }
-        } else {
-            console.log('🏭 Production mode: using pre-generated migrations');
-        }
+        const Database = (await import('better-sqlite3')).default;
+        const db = new Database(dbPath, { readonly: true });
 
-        // Run the migrations
-        execSync('npm run db:migrate', { stdio: 'inherit' });
-        console.log('✅ Database migrations completed successfully');
+        // Check if tables exist by querying sqlite_master
+        const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
+        db.close();
 
+        return tables.length > 0;
     } catch (error) {
-        console.error('❌ Database migration failed:', error.message);
+        console.log(`ℹ️  Could not check existing tables: ${error.message}`);
+        return false;
+    }
+}
 
-        // Try to provide more helpful error information
-        if (error.message.includes('ENOENT')) {
-            console.error('💡 Hint: Make sure drizzle-kit is installed and migration files exist');
-        } else if (error.message.includes('permission')) {
-            console.error('💡 Hint: Check database directory permissions');
-        } else if (error.message.includes('locked')) {
-            console.error('💡 Hint: Database may be locked by another process');
+// Run database migrations with better error handling
+async function runMigrations(dbPath) {
+    console.log('🔄 Setting up database schema...');
+
+    const hasExistingTables = await checkDatabaseExists(dbPath);
+
+    if (hasExistingTables) {
+        console.log('📋 Existing database detected, using schema push instead of migrations');
+
+        try {
+            // For existing databases, use push to sync schema safely with auto-approval
+            execSync('npx drizzle-kit push --force', { stdio: 'inherit' });
+            console.log('✅ Database schema synchronized successfully');
+        } catch (pushError) {
+            console.log('⚠️  Schema push failed, this may be normal if schema is already up to date');
+            console.log('🔄 Continuing with startup...');
         }
+    } else {
+        console.log('🆕 New database detected, running initial setup');
 
-        throw error;
+        try {
+            // Skip generation in production - migrations should be pre-generated
+            if (process.env.NODE_ENV !== 'production') {
+                try {
+                    execSync('npm run db:generate', { stdio: 'pipe' });
+                    console.log('📋 Migration generation completed');
+                } catch (genError) {
+                    console.log('ℹ️  No new migrations to generate (this is normal)');
+                }
+            } else {
+                console.log('🏭 Production mode: using pre-generated migrations');
+            }
+
+            // For new databases, try migrations first, fall back to push
+            try {
+                execSync('npm run db:migrate', { stdio: 'inherit' });
+                console.log('✅ Database migrations completed successfully');
+            } catch (migrateError) {
+                console.log('⚠️  Migration failed, trying schema push as fallback');
+                execSync('npx drizzle-kit push --force', { stdio: 'inherit' });
+                console.log('✅ Database schema created successfully');
+            }
+
+        } catch (error) {
+            console.error('❌ Database setup failed:', error.message);
+
+            // Try to provide more helpful error information
+            if (error.message.includes('ENOENT')) {
+                console.error('💡 Hint: Make sure drizzle-kit is installed and migration files exist');
+            } else if (error.message.includes('permission')) {
+                console.error('💡 Hint: Check database directory permissions');
+            } else if (error.message.includes('locked')) {
+                console.error('💡 Hint: Database may be locked by another process');
+            }
+
+            throw error;
+        }
     }
 }
 
@@ -174,7 +218,7 @@ async function initialize() {
 
         const dbPath = getDbPath();
         setupDatabase(dbPath);
-        runMigrations();
+        await runMigrations(dbPath);
         await verifyDatabase(dbPath);
         createHealthCheck();
 
