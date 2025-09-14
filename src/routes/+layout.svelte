@@ -72,7 +72,7 @@
 				class="text-xl font-bold hover:text-primary transition-colors duration-200 flex items-center gap-3 px-2 py-1 rounded-lg hover:bg-base-300/50"
 				><span class="text-2xl">📚</span>
 				<span
-					class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+					class="text-primary font-bold"
 					>Audiobook Wishlist</span
 				></a
 			>

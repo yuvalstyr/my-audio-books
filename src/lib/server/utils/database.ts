@@ -367,7 +367,7 @@ class PerformanceMonitor {
         }
     }
 
-    getMetrics(): DatabasePerformanceMetrics {
+    async getMetrics(): Promise<DatabasePerformanceMetrics> {
         const recentMetrics = this.queryMetrics.filter(
             m => Date.now() - m.timestamp < 300000 // Last 5 minutes
         );
@@ -384,7 +384,7 @@ class PerformanceMonitor {
             ? ((totalQueries - successfulQueries.length) / totalQueries) * 100
             : 0;
 
-        const { connectionManager } = require('$lib/server/db/connection.js');
+        const { connectionManager } = await import('$lib/server/db/connection.js');
         const connectionStats = connectionManager.getStats();
 
         return {
@@ -414,7 +414,7 @@ export async function getDatabasePerformanceMetrics(): Promise<DatabasePerforman
     databaseSize?: number;
     tableStats?: Record<string, number>;
 }> {
-    const baseMetrics = performanceMonitor.getMetrics();
+    const baseMetrics = await performanceMonitor.getMetrics();
 
     try {
         // Get database size and table statistics

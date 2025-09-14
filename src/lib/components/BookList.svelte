@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Book } from "$lib/types/book";
-    import { BookCard, SearchAndFilter } from "$lib/components";
+    import { BookCard, SearchAndFilter, EmptyState } from "$lib/components";
     import LoadingState from "./LoadingState.svelte";
     import { createEventDispatcher } from "svelte";
     import { createFilteredBooks } from "$lib/stores/filter-store";
@@ -51,7 +51,7 @@
         >
             <div
                 slot="skeleton"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                class="grid grid-cols-1 lg:grid-cols-4 gap-6"
             >
                 {#each Array(8) as _}
                     <div
@@ -146,57 +146,35 @@
             </button>
         </div>
     {:else if books.length === 0}
-        <!-- Empty State -->
-        <div class="flex flex-col items-center justify-center py-16">
-            <div class="text-6xl mb-4">📚</div>
-            <h3 class="text-2xl font-bold mb-2">
-                No books in your wishlist yet
-            </h3>
-            <p class="text-base-content/70 text-center max-w-md mb-6">
-                Start building your audiobook collection by adding your first
-                book. You can paste an Audible link or enter details manually.
-            </p>
-            <button
-                class="btn btn-primary"
-                on:click={() => dispatch("addBook")}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4v16m8-8H4"
-                    />
-                </svg>
-                Add Your First Book
-            </button>
-        </div>
+        <!-- Unified Empty State -->
+        <EmptyState
+            icon="📚"
+            title="No books in your wishlist yet"
+            description="Start building your audiobook collection by adding your first book. You can paste an Audible link or enter details manually."
+            actions={[
+                {
+                    label: "Add Your First Book",
+                    onClick: () => dispatch("addBook"),
+                    variant: "primary"
+                }
+            ]}
+        />
     {:else}
         <!-- Search and Filter Controls -->
         <SearchAndFilter />
 
         {#if $filteredBooks.length === 0}
             <!-- No Results State -->
-            <div class="flex flex-col items-center justify-center py-12">
-                <div class="text-4xl mb-4">🔍</div>
-                <h3 class="text-xl font-bold mb-2">
-                    No books match your filters
-                </h3>
-                <p class="text-base-content/70 text-center max-w-md">
-                    Try adjusting your search terms or removing some filters to
-                    see more results.
-                </p>
-            </div>
+            <EmptyState
+                icon="🔍"
+                title="No books match your filters"
+                description="Try adjusting your search terms or removing some filters to see more results."
+                actions={[]}
+            />
         {:else}
-            <!-- Books Grid -->
+            <!-- Books Grid - iPhone 16 to Mac responsive -->
             <div
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                class="grid grid-cols-1 lg:grid-cols-4 gap-6"
             >
                 {#each $filteredBooks as book (book.id)}
                     <div class="book-item">

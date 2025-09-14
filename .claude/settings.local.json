@@ -5,7 +5,9 @@
       "Bash(npm run check:*)",
       "Bash(sqlite3:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:daisyui.com)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

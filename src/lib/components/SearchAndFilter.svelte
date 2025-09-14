@@ -52,7 +52,7 @@
 </script>
 
 <div
-    class="search-and-filter bg-base-100 p-4 rounded-lg shadow-sm border border-base-300 mb-6"
+    class="search-and-filter bg-base-100/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-base-300/50 mb-6"
 >
     <!-- Search Bar -->
     <div class="flex flex-col sm:flex-row gap-4 mb-4">
@@ -80,7 +80,7 @@
                     <input
                         type="text"
                         placeholder="Search by title or author..."
-                        class="input input-bordered w-full pl-10 {$filterStore.searchQuery
+                        class="input input-bordered w-full pl-10 bg-base-100 border-base-300/60 focus:border-primary/40 focus:ring-0 focus:outline-none {$filterStore.searchQuery
                             ? 'pr-12'
                             : ''}"
                         value={$filterStore.searchQuery}
@@ -120,35 +120,21 @@
         <!-- Filter Toggle Button -->
         <div class="flex gap-2 items-start">
             <button
-                class="btn btn-outline"
+                class="btn btn-outline btn-sm"
                 class:btn-active={showFilters}
                 on:click={() => (showFilters = !showFilters)}
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
-                    />
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                 </svg>
-                Filters
                 {#if $filterStore.selectedTags.length > 0}
-                    <span class="badge badge-primary badge-sm ml-1"
-                        >{$filterStore.selectedTags.length}</span
-                    >
+                    <span class="badge badge-primary badge-xs ml-1">{$filterStore.selectedTags.length}</span>
                 {/if}
             </button>
 
             {#if $filterStore.searchQuery || $filterStore.selectedTags.length > 0}
-                <button class="btn btn-ghost btn-sm" on:click={clearAllFilters}>
-                    Clear All
+                <button class="btn btn-ghost btn-xs" on:click={clearAllFilters}>
+                    Clear
                 </button>
             {/if}
         </div>
@@ -156,26 +142,23 @@
 
     <!-- Expanded Filters -->
     {#if showFilters}
-        <div class="border-t border-base-300 pt-4">
+        <div class="border-t border-base-300/40 pt-4 bg-base-200/20 -mx-4 px-4 -mb-4 pb-4 rounded-b-lg">
             <!-- Tag Filters -->
             <div class="mb-4">
-                <h4 class="font-semibold mb-2 text-sm">Filter by Tags:</h4>
+                <h4 class="font-semibold mb-3 text-sm text-base-content/80">Filter by Tags:</h4>
                 <div class="flex flex-wrap gap-2">
                     {#each availableTags as tag}
-                        <label class="cursor-pointer">
+                        <label class="cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-base-300/30 transition-colors">
                             <input
                                 type="checkbox"
-                                class="checkbox checkbox-sm mr-2"
+                                class="checkbox checkbox-sm checkbox-primary"
                                 checked={$filterStore.selectedTags.includes(
                                     tag.name,
                                 )}
                                 on:change={() => handleTagToggle(tag.name)}
                             />
                             <span
-                                class="badge {tag.color} badge-outline"
-                                class:badge-solid={$filterStore.selectedTags.includes(
-                                    tag.name,
-                                )}
+                                class="badge {$filterStore.selectedTags.includes(tag.name) ? tag.color : tag.color + ' badge-outline'} transition-colors"
                             >
                                 {tag.label}
                             </span>
@@ -188,7 +171,7 @@
             <div class="flex flex-col sm:flex-row gap-4 items-end">
                 <div class="form-control flex-1 sm:flex-initial">
                     <label class="label" for="sort-by-select">
-                        <span class="label-text text-sm font-semibold"
+                        <span class="label-text text-sm font-semibold text-base-content/80"
                             >Sort by:</span
                         >
                     </label>
@@ -206,7 +189,7 @@
 
                 <div class="form-control flex-1 sm:flex-initial">
                     <div class="label">
-                        <span class="label-text text-sm font-semibold"
+                        <span class="label-text text-sm font-semibold text-base-content/80"
                             >Order:</span
                         >
                     </div>
@@ -254,39 +237,3 @@
     {/if}
 </div>
 
-<style>
-    .badge-solid {
-        color: white;
-    }
-
-    .badge-primary.badge-solid {
-        background-color: hsl(var(--p));
-        border-color: hsl(var(--p));
-    }
-
-    .badge-accent.badge-solid {
-        background-color: hsl(var(--a));
-        border-color: hsl(var(--a));
-    }
-
-    .badge-warning.badge-solid {
-        background-color: hsl(var(--wa));
-        border-color: hsl(var(--wa));
-        color: hsl(var(--wac));
-    }
-
-    .badge-info.badge-solid {
-        background-color: hsl(var(--in));
-        border-color: hsl(var(--in));
-    }
-
-    .badge-success.badge-solid {
-        background-color: hsl(var(--su));
-        border-color: hsl(var(--su));
-    }
-
-    .badge-error.badge-solid {
-        background-color: hsl(var(--er));
-        border-color: hsl(var(--er));
-    }
-</style>

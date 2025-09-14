@@ -52,9 +52,6 @@ export const GET: RequestHandler = async ({ request, url }) => {
                 coverImageUrl: books.coverImageUrl,
                 queuePosition: books.queuePosition,
                 dateAdded: books.dateAdded,
-                dateUpdated: books.dateUpdated,
-                createdAt: books.createdAt,
-                updatedAt: books.updatedAt,
                 tagId: tags.id,
                 tagName: tags.name,
                 tagColor: tags.color
@@ -71,7 +68,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
         }
 
         // Apply ordering
-        query = query.orderBy(desc(books.createdAt));
+        query = query.orderBy(desc(books.dateAdded));
 
         // Execute query with retry logic
         const booksWithTags = await executeWithRetry(
@@ -97,9 +94,6 @@ export const GET: RequestHandler = async ({ request, url }) => {
                     coverImageUrl: row.coverImageUrl,
                     queuePosition: row.queuePosition,
                     dateAdded: new Date(row.dateAdded),
-                    dateUpdated: new Date(row.dateUpdated),
-                    createdAt: new Date(row.createdAt),
-                    updatedAt: new Date(row.updatedAt),
                     tags: []
                 });
             }
@@ -216,9 +210,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 coverImageUrl: input.coverImageUrl?.trim() || null,
                 queuePosition: input.queuePosition || null,
                 dateAdded: now,
-                dateUpdated: now,
-                createdAt: now,
-                updatedAt: now
+                dateAdded: now
             }).run();
 
             // Handle tags if provided
@@ -240,7 +232,6 @@ export const POST: RequestHandler = async ({ request }) => {
                             id: tag.id,
                             name: tag.name,
                             color: tag.color,
-                            createdAt: now
                         }).run();
                     } else {
                         tagId = existingTag[0].id;
@@ -271,9 +262,7 @@ export const POST: RequestHandler = async ({ request }) => {
                     coverImageUrl: books.coverImageUrl,
                     queuePosition: books.queuePosition,
                     dateAdded: books.dateAdded,
-                    dateUpdated: books.dateUpdated,
-                    createdAt: books.createdAt,
-                    updatedAt: books.updatedAt,
+                    dateAdded: books.dateAdded,
                     tagId: tags.id,
                     tagName: tags.name,
                     tagColor: tags.color
@@ -300,9 +289,6 @@ export const POST: RequestHandler = async ({ request }) => {
                 coverImageUrl: createdBookWithTags[0].coverImageUrl,
                 queuePosition: createdBookWithTags[0].queuePosition,
                 dateAdded: new Date(createdBookWithTags[0].dateAdded),
-                dateUpdated: new Date(createdBookWithTags[0].dateUpdated),
-                createdAt: new Date(createdBookWithTags[0].createdAt),
-                updatedAt: new Date(createdBookWithTags[0].updatedAt),
                 tags: createdBookWithTags
                     .filter(row => row.tagId)
                     .map(row => ({

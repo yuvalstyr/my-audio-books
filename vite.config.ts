@@ -18,7 +18,6 @@ export default defineConfig({
 				name: 'Audiobook Wishlist Manager',
 				short_name: 'Audiobook Wishlist',
 				description: 'Personal audiobook wishlist management application',
-				theme_color: '#1f2937',
 				background_color: '#ffffff',
 				display: 'standalone',
 				orientation: 'portrait-primary',

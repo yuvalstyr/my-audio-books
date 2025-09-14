@@ -2,7 +2,7 @@
     import { onMount, tick } from "svelte";
     import type { PageData } from "./$types";
     import type { Book, CreateBookInput, BookTag } from "$lib/types/book";
-    import { BookList, BookForm } from "$lib/components";
+    import { BookList, BookForm, PageHeader } from "$lib/components";
     import Toast from "$lib/components/Toast.svelte";
     import LoadingState from "$lib/components/LoadingState.svelte";
     import {
@@ -300,71 +300,23 @@
 </svelte:head>
 
 <div class="container mx-auto p-4 max-w-7xl">
-    <!-- Header -->
-    <div
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
-    >
-        <div>
-            <h1 class="text-3xl font-bold">📚 My Audiobook Wishlist</h1>
-            <p class="text-base-content/70 mt-1">
-                Manage your audiobook collection and reading queue
-            </p>
-        </div>
+    <!-- Unified Page Header -->
+    <PageHeader
+        title="My Audiobook Wishlist"
+        subtitle="Manage your audiobook collection and reading queue"
+        emoji="📚"
+        showBadge={books.length > 0}
+        badgeText="{books.length} book{books.length === 1 ? '' : 's'} total"
+        isLoading={loading}
+        {isRefreshing}
+        onRefresh={retryLoad}
+        primaryAction={{
+            label: "Add Book",
+            onClick: openAddBookModal
+        }}
+    />
 
-        <div class="flex items-center gap-3">
-            <!-- Add Book Button -->
-            <button
-                class="btn btn-primary"
-                on:click={openAddBookModal}
-                disabled={loading}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4v16m8-8H4"
-                    />
-                </svg>
-                Add Book
-            </button>
-
-            <!-- Refresh Button -->
-            <button
-                class="btn btn-outline btn-sm"
-                class:loading={isRefreshing}
-                on:click={retryLoad}
-                disabled={loading || isRefreshing}
-                title="Refresh data from server"
-            >
-                {#if !isRefreshing}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                    </svg>
-                {/if}
-                {isRefreshing ? "Refreshing..." : "Refresh"}
-            </button>
-        </div>
-    </div>
-
-    <!-- Error Alert -->
+    <!-- Enhanced Error Alert with Recovery Options -->
     {#if error}
         <div class="alert alert-error mb-6">
             <svg
@@ -380,27 +332,79 @@
                     d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
             </svg>
-            <span>{error}</span>
-            <button
-                class="btn btn-sm btn-ghost"
-                on:click={clearError}
-                aria-label="Clear error"
-            >
+            <div class="flex-1">
+                <div class="font-semibold">Unable to load books</div>
+                <div class="text-sm opacity-90">{error}</div>
+            </div>
+            <div class="flex gap-2">
+                <button
+                    class="btn btn-sm btn-ghost"
+                    on:click={retryLoad}
+                    disabled={loading || isRefreshing}
+                    title="Retry loading data"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 mr-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                    </svg>
+                    Retry
+                </button>
+                <button
+                    class="btn btn-sm btn-ghost"
+                    on:click={clearError}
+                    aria-label="Dismiss error"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Enhanced Loading State -->
+    {#if loading && books.length === 0}
+        <LoadingState message="Loading your audiobooks..." />
+    {:else if isRefreshing && books.length > 0}
+        <!-- Show refreshing indicator while keeping existing content visible -->
+        <div class="mb-4">
+            <div class="alert alert-info">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4"
+                    class="stroke-current shrink-0 h-6 w-6 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
                 >
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                 </svg>
-            </button>
+                <span>Refreshing your book collection...</span>
+            </div>
         </div>
     {/if}
 
