@@ -51,7 +51,7 @@
         >
             <div
                 slot="skeleton"
-                class="grid grid-cols-1 lg:grid-cols-4 gap-6"
+                class="books-grid"
             >
                 {#each Array(8) as _}
                     <div
@@ -172,9 +172,9 @@
                 actions={[]}
             />
         {:else}
-            <!-- Books Grid - iPhone 16 to Mac responsive -->
+            <!-- Books Grid - 1 column on mobile, 2 columns on desktop -->
             <div
-                class="grid grid-cols-1 lg:grid-cols-4 gap-6"
+                class="books-grid gap-6"
             >
                 {#each $filteredBooks as book (book.id)}
                     <div class="book-item">
@@ -218,32 +218,28 @@
         width: 100%;
     }
 
+    /* Force 2-column layout */
+    .books-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Desktop: 2 columns */
+    @media (min-width: 1024px) {
+        .books-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
     .book-item {
         height: fit-content;
     }
 
-    /* Responsive adjustments for mobile */
-    @media (max-width: 640px) {
-        .grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-    }
-
     /* Ensure consistent card heights in grid */
-    .book-item :global(.card) {
+    .book-item :global(.group) {
         height: 100%;
         display: flex;
         flex-direction: column;
-    }
-
-    .book-item :global(.card-body) {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .book-item :global(.card-actions) {
-        margin-top: auto;
     }
 </style>

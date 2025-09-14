@@ -12,6 +12,8 @@
     toggleNext: { book: Book };
   }>();
 
+  let isHovered = false;
+
   function handleEdit() {
     dispatch("edit", { book });
   }
@@ -26,10 +28,9 @@
 
   function formatRating(rating?: number): string {
     if (!rating) return "N/A";
-    return `${rating.toFixed(1)}/5`;
+    return `${rating.toFixed(1)}`;
   }
 
-  // Keep the beloved tag color function exactly as it was!
   function getTagColor(tagName: string): string {
     const tagColors: Record<string, string> = {
       funny: "badge-warning",
@@ -44,148 +45,137 @@
 
   function formatHighlyRatedFor(highlyRatedFor?: string): string[] {
     if (!highlyRatedFor?.trim()) return [];
-    return highlyRatedFor.split('•').map(item => item.trim()).filter(item => item.length > 0);
+    return highlyRatedFor
+      .split("•")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
   }
 
   $: hasNextTag = book.tags.some((tag) => tag.name === "next");
+  $: hasRatings = book.narratorRating || book.performanceRating;
+  $: hasHighlyRated =
+    book.highlyRatedFor && formatHighlyRatedFor(book.highlyRatedFor).length > 0;
 </script>
 
+<!-- Book Card: Horizontal layout with cover on left -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-500 border border-gray-600 hover:border-gray-300/80 h-full flex flex-col rounded-xl"
+  class="group relative bg-white dark:bg-base-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-base-300 h-full"
+  style="display: flex; flex-direction: row;"
+  on:mouseenter={() => (isHovered = true)}
+  on:mouseleave={() => (isHovered = false)}
 >
-  <div class="card-body p-4 flex-1 flex flex-col">
-    <!-- Book Cover and Title Section -->
-    <div class="flex gap-3 mb-3 flex-shrink-0">
-      <!-- Book Cover -->
-      <div class="flex-shrink-0">
-        <div
-          class="w-16 h-20 bg-base-200/60 border border-base-300/30 rounded-md overflow-hidden shadow-sm"
-        >
-          {#if book.coverImageUrl}
-            <img
-              src={book.coverImageUrl}
-              alt="Cover of {book.title}"
-              class="w-full h-full object-cover"
-              loading="lazy"
-            />
-          {:else}
-            <!-- Placeholder cover -->
-            <div
-              class="w-full h-full flex flex-col items-center justify-center text-base-content/30 bg-gradient-to-br from-base-200/40 to-base-300/40"
-            >
-              <svg
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-          {/if}
-        </div>
-      </div>
-
-      <!-- Book Info -->
-      <div class="flex-1 min-w-0">
-        <h3
-          class="card-title text-base font-semibold line-clamp-2 mb-1 text-base-content leading-tight"
-        >
-          {book.title}
-        </h3>
-        <p class="text-base-content/60 text-sm font-normal">
-          by {book.author}
-        </p>
-
-        <!-- Ratings Display -->
-        {#if book.narratorRating || book.performanceRating}
-          <div class="space-y-1 mb-3 flex-shrink-0">
-            {#if book.narratorRating}
-              <div class="flex items-center gap-2 text-xs">
-                <span class="text-base-content/50 font-normal w-14"
-                  >Narrator:</span
-                >
-                <div class="rating rating-xs gap-0.5">
-                  {#each Array(5) as _, i}
-                    <input
-                      type="radio"
-                      class="mask mask-star-2 bg-warning"
-                      disabled
-                      checked={i < Math.round(book.narratorRating || 0)}
-                    />
-                  {/each}
-                </div>
-                <span class="text-base-content/60 font-normal"
-                  >{formatRating(book.narratorRating)}</span
-                >
-              </div>
-            {/if}
-
-            {#if book.performanceRating}
-              <div class="flex items-center gap-2 text-xs">
-                <span class="text-base-content/50 font-normal w-14">Story:</span
-                >
-                <div class="rating rating-xs gap-0.5">
-                  {#each Array(5) as _, i}
-                    <input
-                      type="radio"
-                      class="mask mask-star-2 bg-info"
-                      disabled
-                      checked={i < Math.round(book.performanceRating || 0)}
-                    />
-                  {/each}
-                </div>
-                <span class="text-base-content/60 font-normal"
-                  >{formatRating(book.performanceRating)}</span
-                >
-              </div>
-            {/if}
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Tags -->
-    {#if book.tags.length > 0}
-      <div class="flex flex-wrap gap-1.5 mb-4 flex-shrink-0">
-        {#each book.tags as tag}
+  <!-- Book Cover (Left side) -->
+  <div
+    class="relative w-32 sm:w-40 flex-shrink-0 overflow-hidden bg-gradient-to-br from-base-200 to-base-300"
+  >
+    {#if book.coverImageUrl}
+      <img
+        src={book.coverImageUrl}
+        alt="Cover of {book.title}"
+        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+      />
+    {:else}
+      <!-- Fun & Pretty Placeholder -->
+      <div
+        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900/30 dark:to-pink-800/30 relative overflow-hidden"
+      >
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
           <div
-            class="badge {getTagColor(tag.name)} badge-sm font-normal text-xs"
+            class="absolute top-2 left-2 text-purple-300 dark:text-purple-600"
           >
-            {tag.name}
+            📚
           </div>
-        {/each}
+          <div class="absolute top-6 right-4 text-pink-300 dark:text-pink-600">
+            ✨
+          </div>
+          <div
+            class="absolute bottom-4 left-3 text-purple-300 dark:text-purple-600"
+          >
+            📖
+          </div>
+          <div
+            class="absolute bottom-2 right-2 text-pink-300 dark:text-pink-600"
+          >
+            💫
+          </div>
+          <div
+            class="absolute top-1/3 left-1/2 text-purple-200 dark:text-purple-700"
+          >
+            🌟
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="text-center text-purple-600 dark:text-purple-300 z-10">
+          <div class="text-3xl mb-2">📚</div>
+          <div class="text-lg mb-1">🎧</div>
+          <p class="text-xs font-bold text-purple-700 dark:text-purple-200">
+            Mystery
+          </p>
+          <p class="text-xs font-medium text-purple-600 dark:text-purple-300">
+            Audiobook!
+          </p>
+          <div class="text-sm mt-1">✨</div>
+        </div>
+
+        <!-- Floating Elements -->
+        <div
+          class="absolute top-1/4 right-1/4 text-pink-400 dark:text-pink-500 animate-bounce text-xs"
+        >
+          🎵
+        </div>
+        <div
+          class="absolute bottom-1/3 left-1/4 text-purple-400 dark:text-purple-500 animate-pulse text-xs"
+        >
+          📝
+        </div>
       </div>
     {/if}
 
-    <!-- Highly Rated For -->
-    <div class="mb-3 flex-shrink-0 min-h-[2.5rem]">
-      {#if book.highlyRatedFor && formatHighlyRatedFor(book.highlyRatedFor).length > 0}
-        <div class="text-xs text-base-content/60 mb-2">Highly rated for:</div>
-        <div class="chat chat-start">
-          <div class="chat-bubble chat-bubble-accent text-xs py-1 px-2 min-h-0">
-            {#each formatHighlyRatedFor(book.highlyRatedFor) as item, index}
-              {item}{#if index < formatHighlyRatedFor(book.highlyRatedFor).length - 1} • {/if}
-            {/each}
-          </div>
+    <!-- Next Badge (Always Visible if Present) -->
+    {#if hasNextTag}
+      <div class="absolute top-3 right-3">
+        <div class="badge badge-primary badge-sm font-medium shadow-lg">
+          <svg
+            class="w-3 h-3 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          Next
         </div>
-      {/if}
-    </div>
+      </div>
+    {/if}
 
-    <!-- Spacer -->
-    <div class="flex-1"></div>
+    <!-- Queue Position Badge (if exists) -->
+    {#if book.queuePosition}
+      <div class="absolute top-3 left-3">
+        <div class="badge badge-info badge-sm font-medium shadow-lg">
+          #{book.queuePosition}
+        </div>
+      </div>
+    {/if}
 
-    <!-- Action Buttons -->
-    <div class="card-actions justify-end flex-shrink-0">
-      <div class="flex gap-2">
-        <!-- Quick Toggle Next Button -->
+    <!-- Hover Overlay with Quick Actions -->
+    <div
+      class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+    >
+      <div class="flex gap-3">
+        <!-- Quick Toggle Next -->
         <button
-          class="btn btn-sm {hasNextTag ? 'btn-primary' : 'btn-outline'}"
+          class="btn btn-sm btn-circle {hasNextTag
+            ? 'btn-primary'
+            : 'btn-accent'} shadow-lg"
           on:click={handleToggleNext}
           aria-label="{hasNextTag ? 'Remove from' : 'Add to'} next queue"
           disabled={isUpdating || isDeleting}
@@ -194,7 +184,7 @@
             <span class="loading loading-spinner loading-xs"></span>
           {:else if hasNextTag}
             <svg
-              class="h-4 w-4"
+              class="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -203,12 +193,12 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M5 13l4 4L19 7"
+                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
           {:else}
             <svg
-              class="h-4 w-4"
+              class="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -223,15 +213,39 @@
           {/if}
         </button>
 
-        <!-- Actions Dropdown -->
-        <div class="dropdown dropdown-end">
-          <div
-            tabindex="0"
-            role="button"
-            class="btn btn-sm btn-outline btn-square"
+        <!-- Edit Button -->
+        <!-- svelte-ignore a11y_consider_explicit_label -->
+        <button
+          class="btn btn-sm btn-circle btn-neutral shadow-lg"
+          on:click={handleEdit}
+          disabled={isUpdating || isDeleting}
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            />
+          </svg>
+        </button>
+
+        <!-- Delete Button -->
+        <button
+          class="btn btn-sm btn-circle btn-error shadow-lg"
+          on:click={handleDelete}
+          disabled={isUpdating || isDeleting}
+        >
+          {#if isDeleting}
+            <span class="loading loading-spinner loading-xs"></span>
+          {:else}
             <svg
-              class="h-4 w-4"
+              class="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -240,67 +254,123 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
               />
             </svg>
-          </div>
-          <ul
-            tabindex="0"
-            class="dropdown-content menu bg-base-100 rounded-box z-[1] w-36 p-1 shadow-lg border border-base-300/40"
-          >
-            <li>
-              <button
-                class="text-left"
-                on:click={handleEdit}
-                disabled={isUpdating || isDeleting}
-              >
-                <svg
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                Edit Book
-              </button>
-            </li>
-            <li>
-              <button
-                class="text-left text-error hover:bg-error/10"
-                on:click={handleDelete}
-                disabled={isUpdating || isDeleting}
-              >
-                {#if isDeleting}
-                  <span class="loading loading-spinner loading-xs"></span>
-                  Deleting...
-                {:else}
-                  <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                  Delete Book
-                {/if}
-              </button>
-            </li>
-          </ul>
-        </div>
+          {/if}
+        </button>
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Book Information (Right side) -->
+  <div class="flex-1 p-5 space-y-4 min-w-0" style="flex: 1;">
+    <!-- Title and Author -->
+    <div>
+      <h3
+        class="font-semibold text-lg leading-tight line-clamp-2 text-gray-900 dark:text-base-content mb-2"
+      >
+        {book.title}
+      </h3>
+      <p class="text-sm text-gray-600 dark:text-base-content/70 font-medium">
+        by {book.author}
+      </p>
+    </div>
+
+    <!-- Highly Rated For (Always Visible if Present, without label) -->
+    {#if hasHighlyRated}
+      <div
+        class="text-sm text-gray-600 dark:text-base-content/70 italic leading-relaxed bg-accent/10 rounded-lg p-3"
+      >
+        {#each formatHighlyRatedFor(book.highlyRatedFor) as item, index}
+          "{item}"{#if index < formatHighlyRatedFor(book.highlyRatedFor).length - 1}
+            •
+          {/if}
+        {/each}
+      </div>
+    {/if}
+
+    <!-- Tags (Always Visible if Present) -->
+    {#if book.tags.length > 0}
+      <div class="flex flex-wrap gap-1.5">
+        {#each book.tags as tag}
+          <span class="badge {getTagColor(tag.name)} badge-sm font-medium">
+            {tag.name}
+          </span>
+        {/each}
+      </div>
+    {/if}
+
+    <!-- Ratings (Always Visible if Present) -->
+    {#if hasRatings}
+      <div class="space-y-3">
+        {#if book.narratorRating}
+          <div class="flex items-center gap-3">
+            <span
+              class="text-gray-600 dark:text-base-content/60 text-sm font-medium min-w-[70px]"
+              >Narrator:</span
+            >
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-0.5">
+                {#each Array(5) as _, i}
+                  <div
+                    class="w-4 h-4 mask mask-star-2 {i <
+                    Math.round(book.narratorRating || 0)
+                      ? 'bg-warning'
+                      : 'bg-base-300'}"
+                  ></div>
+                {/each}
+              </div>
+              <span
+                class="text-sm font-semibold text-gray-700 dark:text-base-content/80"
+                >{formatRating(book.narratorRating)}/5</span
+              >
+            </div>
+          </div>
+        {/if}
+
+        {#if book.performanceRating}
+          <div class="flex items-center gap-3">
+            <span
+              class="text-gray-600 dark:text-base-content/60 text-sm font-medium min-w-[70px]"
+              >Story:</span
+            >
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-0.5">
+                {#each Array(5) as _, i}
+                  <div
+                    class="w-4 h-4 mask mask-star-2 {i <
+                    Math.round(book.performanceRating || 0)
+                      ? 'bg-info'
+                      : 'bg-base-300'}"
+                  ></div>
+                {/each}
+              </div>
+              <span
+                class="text-sm font-semibold text-gray-700 dark:text-base-content/80"
+                >{formatRating(book.performanceRating)}/5</span
+              >
+            </div>
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    <!-- Meta Information -->
+    <div
+      class="flex justify-between items-center text-xs text-gray-500 dark:text-base-content/50 pt-2 border-t border-gray-200 dark:border-base-300"
+    >
+      <span>Added {new Date(book.dateAdded).toLocaleDateString()}</span>
+      {#if book.audibleUrl}
+        <a
+          href={book.audibleUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-primary hover:link-accent"
+        >
+          View on Audible
+        </a>
+      {/if}
+    </div>
+  </div>
+</div>

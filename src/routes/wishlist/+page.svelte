@@ -303,10 +303,7 @@
     <!-- Unified Page Header -->
     <PageHeader
         title="My Audiobook Wishlist"
-        subtitle="Manage your audiobook collection and reading queue"
         emoji="📚"
-        showBadge={books.length > 0}
-        badgeText="{books.length} book{books.length === 1 ? '' : 's'} total"
         isLoading={loading}
         {isRefreshing}
         onRefresh={retryLoad}

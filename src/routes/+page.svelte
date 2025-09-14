@@ -136,10 +136,7 @@
     <!-- Unified Page Header -->
     <PageHeader
         title="Next Books to Read"
-        subtitle="Your focused reading queue - books you've marked as 'next to read'"
         emoji="📖"
-        showBadge={currentNextBooks.length > 0}
-        badgeText="{currentNextBooks.length} book{currentNextBooks.length === 1 ? '' : 's'} in queue"
         isLoading={loading}
         {isRefreshing}
         onRefresh={retryLoad}
@@ -265,67 +262,52 @@
     {:else}
         <!-- Reading Queue Grid with Optimized Layout -->
         <div class="space-y-6">
-            <!-- Queue Stats -->
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <h2 class="text-xl font-semibold">Your Reading Queue</h2>
-                    <div class="badge badge-outline">
-                        {currentNextBooks.length} book{currentNextBooks.length ===
-                        1
-                            ? ""
-                            : "s"}
-                    </div>
-                </div>
 
-                <!-- Quick Actions -->
-                <div class="hidden sm:flex items-center gap-2">
-                    <div class="text-sm text-base-content/70">
-                        Focus on what's next
-                    </div>
-                </div>
-            </div>
-
-            <!-- Responsive Grid for Next Books - iPhone 16 to Mac only -->
-            <div
-                class="grid grid-cols-1 lg:grid-cols-4 gap-6"
-            >
+            <!-- Responsive Grid for Next Books - 1 column on mobile, 2 columns on desktop -->
+            <div class="books-grid gap-6">
                 {#each currentNextBooks as book (book.id)}
-                    <BookCard
-                        {book}
-                        isUpdating={currentUpdatingBooks.has(book.id)}
-                        on:edit={handleEditBook}
-                        on:delete={handleDeleteBook}
-                        on:toggleNext={handleToggleNext}
-                    />
+                    <div class="book-item">
+                        <BookCard
+                            {book}
+                            isUpdating={currentUpdatingBooks.has(book.id)}
+                            on:edit={handleEditBook}
+                            on:delete={handleDeleteBook}
+                            on:toggleNext={handleToggleNext}
+                        />
+                    </div>
                 {/each}
             </div>
 
-            <!-- Bottom Navigation Hint -->
-            <div class="text-center pt-8 border-t border-base-300">
-                <p class="text-base-content/60 mb-4">
-                    Need to add more books to your queue?
-                </p>
-                <a href="/wishlist" class="btn btn-outline btn-wide">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                        />
-                    </svg>
-                    Browse Full Wishlist
-                </a>
-            </div>
         </div>
     {/if}
 </div>
 
 <!-- Toast Notifications -->
 <Toast />
+
+<style>
+    /* Match BookList styling for consistent card appearance */
+    .books-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Desktop: 2 columns */
+    @media (min-width: 1024px) {
+        .books-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .book-item {
+        height: fit-content;
+    }
+
+    /* Ensure consistent card heights in grid */
+    .book-item :global(.group) {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
