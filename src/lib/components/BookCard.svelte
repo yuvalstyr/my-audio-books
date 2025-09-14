@@ -150,21 +150,6 @@
       </div>
     </div>
 
-    <!-- Highly Rated For -->
-    <div class="mb-3 flex-shrink-0 min-h-[2.5rem]">
-      {#if book.highlyRatedFor && formatHighlyRatedFor(book.highlyRatedFor).length > 0}
-        <div class="text-xs text-base-content/60 mb-1">Highly rated for:</div>
-        <div class="text-xs text-base-content/80">
-          {#each formatHighlyRatedFor(book.highlyRatedFor) as item, index}
-            <span class="inline-flex items-center">
-              <span class="w-1 h-1 bg-base-content/40 rounded-full mr-1.5"></span>
-              {item}{#if index < formatHighlyRatedFor(book.highlyRatedFor).length - 1}<span class="mx-1">•</span>{/if}
-            </span>
-          {/each}
-        </div>
-      {/if}
-    </div>
-
     <!-- Tags -->
     {#if book.tags.length > 0}
       <div class="flex flex-wrap gap-1.5 mb-4 flex-shrink-0">
@@ -177,6 +162,20 @@
         {/each}
       </div>
     {/if}
+
+    <!-- Highly Rated For -->
+    <div class="mb-3 flex-shrink-0 min-h-[2.5rem]">
+      {#if book.highlyRatedFor && formatHighlyRatedFor(book.highlyRatedFor).length > 0}
+        <div class="text-xs text-base-content/60 mb-2">Highly rated for:</div>
+        <div class="chat chat-start">
+          <div class="chat-bubble chat-bubble-accent text-xs py-1 px-2 min-h-0">
+            {#each formatHighlyRatedFor(book.highlyRatedFor) as item, index}
+              {item}{#if index < formatHighlyRatedFor(book.highlyRatedFor).length - 1} • {/if}
+            {/each}
+          </div>
+        </div>
+      {/if}
+    </div>
 
     <!-- Spacer -->
     <div class="flex-1"></div>
