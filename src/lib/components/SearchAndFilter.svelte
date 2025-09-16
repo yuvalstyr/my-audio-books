@@ -2,6 +2,9 @@
     import { filterStore, filterActions } from "$lib/stores/filter-store";
     import type { FilterState } from "$lib/types/book";
 
+    // Props
+    export let hideFilterToggle = false; // Hide the filter toggle button when used in a modal
+
     // Available tag options
     const availableTags = [
         { name: "next", label: "Next to Read", color: "badge-primary" },
@@ -22,7 +25,7 @@
             { value: "performanceRating", label: "Performance Rating" },
         ];
 
-    let showFilters = false;
+    let showFilters = hideFilterToggle ? true : false; // Always show filters when hideFilterToggle is true
 
     function handleSearchInput(event: Event) {
         const target = event.target as HTMLInputElement;
@@ -47,7 +50,9 @@
 
     function clearAllFilters() {
         filterActions.clearFilters();
-        showFilters = false;
+        if (!hideFilterToggle) {
+            showFilters = false;
+        }
     }
 </script>
 
@@ -117,27 +122,38 @@
             </div>
         </div>
 
-        <!-- Filter Toggle Button -->
-        <div class="flex gap-2 items-start">
-            <button
-                class="btn btn-outline btn-sm"
-                class:btn-active={showFilters}
-                on:click={() => (showFilters = !showFilters)}
-            >
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-                </svg>
-                {#if $filterStore.selectedTags.length > 0}
-                    <span class="badge badge-primary badge-xs ml-1">{$filterStore.selectedTags.length}</span>
-                {/if}
-            </button>
-
-            {#if $filterStore.searchQuery || $filterStore.selectedTags.length > 0}
-                <button class="btn btn-ghost btn-xs" on:click={clearAllFilters}>
-                    Clear
+        <!-- Filter Toggle Button (hidden when used in modal) -->
+        {#if !hideFilterToggle}
+            <div class="flex gap-2 items-start">
+                <button
+                    class="btn btn-outline btn-sm"
+                    class:btn-active={showFilters}
+                    on:click={() => (showFilters = !showFilters)}
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                    </svg>
+                    {#if $filterStore.selectedTags.length > 0}
+                        <span class="badge badge-primary badge-xs ml-1">{$filterStore.selectedTags.length}</span>
+                    {/if}
                 </button>
+
+                {#if $filterStore.searchQuery || $filterStore.selectedTags.length > 0}
+                    <button class="btn btn-ghost btn-xs" on:click={clearAllFilters}>
+                        Clear
+                    </button>
+                {/if}
+            </div>
+        {:else}
+            <!-- Show clear button when hideFilterToggle is true -->
+            {#if $filterStore.searchQuery || $filterStore.selectedTags.length > 0}
+                <div class="flex gap-2 items-start">
+                    <button class="btn btn-ghost btn-xs" on:click={clearAllFilters}>
+                        Clear
+                    </button>
+                </div>
             {/if}
-        </div>
+        {/if}
     </div>
 
     <!-- Expanded Filters -->

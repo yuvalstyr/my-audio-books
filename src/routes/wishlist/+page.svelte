@@ -451,7 +451,7 @@
                     </button>
                 </div>
 
-                <SearchAndFilter />
+                <SearchAndFilter hideFilterToggle={true} />
 
                 <div class="modal-action">
                     <button class="btn btn-primary" on:click={() => showFilters = false}>
