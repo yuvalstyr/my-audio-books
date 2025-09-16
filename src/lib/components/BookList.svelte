@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Book } from "$lib/types/book";
-    import { BookCard, SearchAndFilter, EmptyState } from "$lib/components";
+    import { BookCard, EmptyState } from "$lib/components";
     import LoadingState from "./LoadingState.svelte";
     import { createEventDispatcher } from "svelte";
     import { createFilteredBooks } from "$lib/stores/filter-store";
@@ -160,9 +160,6 @@
             ]}
         />
     {:else}
-        <!-- Search and Filter Controls -->
-        <SearchAndFilter />
-
         {#if $filteredBooks.length === 0}
             <!-- No Results State -->
             <EmptyState
@@ -172,9 +169,9 @@
                 actions={[]}
             />
         {:else}
-            <!-- Books Grid - 1 column on mobile, 2 columns on desktop -->
+            <!-- Books Grid - 1 column on mobile full width, 2 columns on desktop -->
             <div
-                class="books-grid gap-6"
+                class="books-grid gap-0 lg:gap-6"
             >
                 {#each $filteredBooks as book (book.id)}
                     <div class="book-item">
@@ -191,7 +188,7 @@
             </div>
 
             <!-- Books Count -->
-            <div class="flex justify-center mt-8">
+            <div class="flex justify-center mt-2 lg:mt-8 mx-0 lg:mx-0">
                 <div class="stats shadow">
                     <div class="stat">
                         <div class="stat-title">Showing Books</div>
@@ -218,22 +215,25 @@
         width: 100%;
     }
 
-    /* Force 2-column layout */
+    /* Mobile: 1 column full width */
     .books-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 0;
+        width: 100%;
     }
 
-    /* Desktop: 2 columns */
+    /* Desktop: 2 columns with gaps */
     @media (min-width: 1024px) {
         .books-grid {
             grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
         }
     }
 
     .book-item {
         height: fit-content;
+        width: 100%;
     }
 
     /* Ensure consistent card heights in grid */

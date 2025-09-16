@@ -60,7 +60,7 @@
 <!-- Book Card: Horizontal layout with cover on left -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class="group relative bg-white dark:bg-base-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-base-300 h-full"
+  class="group relative bg-white dark:bg-base-100 rounded-none lg:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border-0 lg:border border-base-300 h-full w-full lg:mx-0 my-1 lg:my-0"
   style="display: flex; flex-direction: row;"
   on:mouseenter={() => (isHovered = true)}
   on:mouseleave={() => (isHovered = false)}

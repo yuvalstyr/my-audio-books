@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
     import type { Book } from "$lib/types/book";
-    import { BookCard, PageHeader, EmptyState } from "$lib/components";
+    import { BookCard, EmptyState } from "$lib/components";
     import Toast from "$lib/components/Toast.svelte";
     import LoadingState from "$lib/components/LoadingState.svelte";
     import {
@@ -44,6 +44,26 @@
         if (!data.nextBooks || data.nextBooks.length === 0 || data.loadError) {
             await loadNextBooks();
         }
+
+        // Listen for the add book event from the mobile menu
+        function handleAddBookEvent() {
+            // Redirect to wishlist page where add book functionality exists
+            window.location.href = '/wishlist';
+        }
+
+        // Listen for the filter toggle event
+        function handleToggleFiltersEvent() {
+            // Redirect to wishlist page where filters exist
+            window.location.href = '/wishlist';
+        }
+
+        window.addEventListener('open-add-book-modal', handleAddBookEvent);
+        window.addEventListener('toggle-filters', handleToggleFiltersEvent);
+
+        return () => {
+            window.removeEventListener('open-add-book-modal', handleAddBookEvent);
+            window.removeEventListener('toggle-filters', handleToggleFiltersEvent);
+        };
     });
 
     /**
@@ -132,23 +152,11 @@
     <title>Next Books to Read - My Audiobook Wishlist</title>
 </svelte:head>
 
-<div class="container mx-auto p-4 max-w-7xl">
-    <!-- Unified Page Header -->
-    <PageHeader
-        title="Next Books to Read"
-        emoji="📖"
-        isLoading={loading}
-        {isRefreshing}
-        onRefresh={retryLoad}
-        primaryAction={{
-            label: "Manage Full Wishlist",
-            href: "/wishlist"
-        }}
-    />
+<div class="w-full lg:container lg:mx-auto p-0 lg:p-2 lg:max-w-7xl">
 
     <!-- Enhanced Error Alert with Recovery Options -->
     {#if error}
-        <div class="alert alert-error mb-6">
+        <div class="alert alert-error mb-2 lg:mb-6 mx-0 lg:mx-0">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="stroke-current shrink-0 h-6 w-6"

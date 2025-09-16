@@ -2,7 +2,7 @@
     import { onMount, tick } from "svelte";
     import type { PageData } from "./$types";
     import type { Book, CreateBookInput, BookTag } from "$lib/types/book";
-    import { BookList, BookForm, PageHeader } from "$lib/components";
+    import { BookList, BookForm, SearchAndFilter } from "$lib/components";
     import Toast from "$lib/components/Toast.svelte";
     import LoadingState from "$lib/components/LoadingState.svelte";
     import {
@@ -34,6 +34,7 @@
     let editingBook: Book | null = null;
     let showDeleteConfirm = false;
     let bookToDelete: Book | null = null;
+    let showFilters = false;
 
     // Individual book operation states (for delete operations not handled by store)
     let deletingBooks = new Set<string>();
@@ -277,6 +278,19 @@
         // Preload the book form component for faster modal opening
         import("$lib/components/BookForm.svelte");
 
+        // Listen for the add book event from the mobile menu
+        function handleAddBookEvent() {
+            openAddBookModal();
+        }
+
+        // Listen for the filter toggle event
+        function handleToggleFiltersEvent() {
+            showFilters = !showFilters;
+        }
+
+        window.addEventListener('open-add-book-modal', handleAddBookEvent);
+        window.addEventListener('toggle-filters', handleToggleFiltersEvent);
+
         // Prefetch performance data in the background (non-blocking)
         fetch("/api/performance")
             .then((response) => response.json())
@@ -292,6 +306,11 @@
             .catch(() => {
                 // Silently fail - this is just background optimization
             });
+
+        return () => {
+            window.removeEventListener('open-add-book-modal', handleAddBookEvent);
+            window.removeEventListener('toggle-filters', handleToggleFiltersEvent);
+        };
     });
 </script>
 
@@ -299,23 +318,11 @@
     <title>My Audiobook Wishlist</title>
 </svelte:head>
 
-<div class="container mx-auto p-4 max-w-7xl">
-    <!-- Unified Page Header -->
-    <PageHeader
-        title="My Audiobook Wishlist"
-        emoji="📚"
-        isLoading={loading}
-        {isRefreshing}
-        onRefresh={retryLoad}
-        primaryAction={{
-            label: "Add Book",
-            onClick: openAddBookModal
-        }}
-    />
+<div class="w-full lg:container lg:mx-auto p-0 lg:p-2 lg:max-w-7xl">
 
     <!-- Enhanced Error Alert with Recovery Options -->
     {#if error}
-        <div class="alert alert-error mb-6">
+        <div class="alert alert-error mb-2 lg:mb-6 mx-0 lg:mx-0">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="stroke-current shrink-0 h-6 w-6"
@@ -385,7 +392,7 @@
         <LoadingState message="Loading your audiobooks..." />
     {:else if isRefreshing && books.length > 0}
         <!-- Show refreshing indicator while keeping existing content visible -->
-        <div class="mb-4">
+        <div class="mb-2 lg:mb-4 mx-0 lg:mx-0">
             <div class="alert alert-info">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -426,6 +433,35 @@
         on:save={handleBookSave}
         on:cancel={handleBookFormCancel}
     />
+
+    <!-- Filters Modal -->
+    {#if showFilters}
+        <div class="modal modal-open" role="dialog" aria-modal="true">
+            <div class="modal-box max-w-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Advanced Filters</h3>
+                    <button
+                        class="btn btn-ghost btn-sm btn-circle"
+                        on:click={() => showFilters = false}
+                        aria-label="Close filters"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <SearchAndFilter />
+
+                <div class="modal-action">
+                    <button class="btn btn-primary" on:click={() => showFilters = false}>
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+            <div class="modal-backdrop" on:click={() => showFilters = false}></div>
+        </div>
+    {/if}
 
     <!-- Delete Confirmation Modal -->
     {#if showDeleteConfirm && bookToDelete}
