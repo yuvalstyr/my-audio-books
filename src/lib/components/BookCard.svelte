@@ -101,11 +101,6 @@
           >
             💫
           </div>
-          <div
-            class="absolute top-1/3 left-1/2 text-purple-200 dark:text-purple-700"
-          >
-            🌟
-          </div>
         </div>
 
         <!-- Main Content -->
@@ -123,12 +118,12 @@
 
         <!-- Floating Elements -->
         <div
-          class="absolute top-1/4 right-1/4 text-pink-400 dark:text-pink-500 animate-bounce text-xs"
+          class="absolute top-1/4 right-2 text-pink-400 dark:text-pink-500 animate-bounce text-xs"
         >
           🎵
         </div>
         <div
-          class="absolute bottom-1/3 left-1/4 text-purple-400 dark:text-purple-500 animate-pulse text-xs"
+          class="absolute bottom-1/3 left-2 text-purple-400 dark:text-purple-500 animate-pulse text-xs"
         >
           📝
         </div>
@@ -264,7 +259,68 @@
   </div>
 
   <!-- Book Information (Right side) -->
-  <div class="flex-1 p-5 space-y-4 min-w-0" style="flex: 1;">
+  <div class="flex-1 p-5 space-y-4 min-w-0 relative" style="flex: 1;">
+
+    <!-- Mobile Action Menu (Always Visible on Mobile) -->
+    <div class="absolute top-3 right-3 lg:hidden">
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" aria-label="Book actions">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+          </svg>
+        </div>
+        <ul class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-48 border border-base-300 z-10">
+          <li>
+            <button
+              class="flex items-center gap-2"
+              on:click={handleEdit}
+              disabled={isUpdating || isDeleting}
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Book
+            </button>
+          </li>
+          <li>
+            <button
+              class="flex items-center gap-2 {hasNextTag ? 'text-error' : 'text-primary'}"
+              on:click={handleToggleNext}
+              disabled={isUpdating || isDeleting}
+            >
+              {#if isUpdating}
+                <span class="loading loading-spinner loading-xs"></span>
+              {:else if hasNextTag}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              {:else}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              {/if}
+              {hasNextTag ? 'Remove from Queue' : 'Add to Queue'}
+            </button>
+          </li>
+          <li>
+            <button
+              class="flex items-center gap-2 text-error"
+              on:click={handleDelete}
+              disabled={isUpdating || isDeleting}
+            >
+              {#if isDeleting}
+                <span class="loading loading-spinner loading-xs"></span>
+              {:else}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              {/if}
+              Delete Book
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
     <!-- Title and Author -->
     <div>
       <h3
