@@ -10,7 +10,7 @@
 		"build:clean": "rm -rf build",
 		"build:app": "vite build",
 		"build:production": "NODE_ENV=production npm run build",
-		"start": "npm run railway:init && NODE_ENV=production node build",
+		"start": "node scripts/start-production.js",
 		"preview": "vite preview",
 		"postinstall": "svelte-kit sync || echo 'SvelteKit sync skipped'",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
