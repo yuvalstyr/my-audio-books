@@ -14,7 +14,6 @@ import {
     getErrorStatus,
     sanitizeErrorDetails
 } from '$lib/server/utils/errors.js';
-import { executeTransaction, executeWithRetry } from '$lib/server/utils/database.js';
 
 const requestLogger = createRequestLogger();
 
@@ -71,13 +70,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
         // Apply ordering
         query = query.orderBy(desc(books.dateAdded));
 
-        // Execute query with retry logic
-        const booksWithTags = await executeWithRetry(
-            () => query,
-            'SELECT_BOOKS_WITH_TAGS',
-            'books',
-            { requestId }
-        );
+        // Execute query
+        const booksWithTags = await query;
 
         // Group books and their tags
         const booksMap = new Map();
@@ -198,110 +192,105 @@ export const POST: RequestHandler = async ({ request }) => {
         const bookId = generateId();
         const now = new Date().toISOString();
 
-        // Use transaction to ensure data consistency
-        const book = executeTransaction((tx) => {
-            // Insert the book
-            tx.insert(books).values({
-                id: bookId,
-                title: input.title.trim(),
-                author: input.author.trim(),
-                audibleUrl: input.audibleUrl?.trim() || null,
-                narratorRating: input.narratorRating || null,
-                performanceRating: input.performanceRating || null,
-                description: input.description?.trim() || null,
-                coverImageUrl: input.coverImageUrl?.trim() || null,
-                queuePosition: input.queuePosition || null,
-                dateAdded: now,
-                highlyRatedFor: input.highlyRatedFor?.trim() || null
-            }).run();
+        // Insert the book
+        await db.insert(books).values({
+            id: bookId,
+            title: input.title.trim(),
+            author: input.author.trim(),
+            audibleUrl: input.audibleUrl?.trim() || null,
+            narratorRating: input.narratorRating || null,
+            performanceRating: input.performanceRating || null,
+            description: input.description?.trim() || null,
+            coverImageUrl: input.coverImageUrl?.trim() || null,
+            queuePosition: input.queuePosition || null,
+            dateAdded: now,
+            highlyRatedFor: input.highlyRatedFor?.trim() || null
+        });
 
-            // Handle tags if provided
-            if (input.tags && input.tags.length > 0) {
-                const bookTagsToInsert = [];
-                for (const tag of input.tags) {
-                    // Check if tag exists, create if not
-                    const existingTag = tx
-                        .select()
-                        .from(tags)
-                        .where(eq(tags.name, tag.name))
-                        .limit(1)
-                        .all();
+        // Handle tags if provided
+        if (input.tags && input.tags.length > 0) {
+            const bookTagsToInsert = [];
+            for (const tag of input.tags) {
+                // Check if tag exists, create if not
+                const existingTag = await db
+                    .select()
+                    .from(tags)
+                    .where(eq(tags.name, tag.name))
+                    .limit(1);
 
-                    let tagId = tag.id;
-                    if (existingTag.length === 0) {
-                        // Create new tag
-                        tx.insert(tags).values({
-                            id: tag.id,
-                            name: tag.name,
-                            color: tag.color,
-                            createdAt: now,
-                        }).run();
-                    } else {
-                        tagId = existingTag[0].id;
-                    }
-
-                    bookTagsToInsert.push({
-                        bookId,
-                        tagId
+                let tagId = tag.id;
+                if (existingTag.length === 0) {
+                    // Create new tag
+                    await db.insert(tags).values({
+                        id: tag.id,
+                        name: tag.name,
+                        color: tag.color,
+                        createdAt: now,
                     });
+                } else {
+                    tagId = existingTag[0].id;
                 }
 
-                // Insert book-tag relationships
-                if (bookTagsToInsert.length > 0) {
-                    tx.insert(bookTags).values(bookTagsToInsert).run();
-                }
+                bookTagsToInsert.push({
+                    bookId,
+                    tagId
+                });
             }
 
-            // Fetch the created book with tags
-            const createdBookWithTags = tx
-                .select({
-                    id: books.id,
-                    title: books.title,
-                    author: books.author,
-                    audibleUrl: books.audibleUrl,
-                    narratorRating: books.narratorRating,
-                    performanceRating: books.performanceRating,
-                    description: books.description,
-                    coverImageUrl: books.coverImageUrl,
-                    queuePosition: books.queuePosition,
-                    dateAdded: books.dateAdded,
-                    highlyRatedFor: books.highlyRatedFor,
-                    tagId: tags.id,
-                    tagName: tags.name,
-                    tagColor: tags.color
-                })
-                .from(books)
-                .leftJoin(bookTags, eq(books.id, bookTags.bookId))
-                .leftJoin(tags, eq(bookTags.tagId, tags.id))
-                .where(eq(books.id, bookId))
-                .all();
-
-            if (createdBookWithTags.length === 0) {
-                throw new Error('Failed to retrieve created book');
+            // Insert book-tag relationships
+            if (bookTagsToInsert.length > 0) {
+                await db.insert(bookTags).values(bookTagsToInsert);
             }
+        }
 
-            // Format the response
-            return {
-                id: createdBookWithTags[0].id,
-                title: createdBookWithTags[0].title,
-                author: createdBookWithTags[0].author,
-                audibleUrl: createdBookWithTags[0].audibleUrl,
-                narratorRating: createdBookWithTags[0].narratorRating,
-                performanceRating: createdBookWithTags[0].performanceRating,
-                description: createdBookWithTags[0].description,
-                coverImageUrl: createdBookWithTags[0].coverImageUrl,
-                queuePosition: createdBookWithTags[0].queuePosition,
-                dateAdded: new Date(createdBookWithTags[0].dateAdded),
-                highlyRatedFor: createdBookWithTags[0].highlyRatedFor,
-                tags: createdBookWithTags
-                    .filter(row => row.tagId)
-                    .map(row => ({
-                        id: row.tagId!,
-                        name: row.tagName!,
-                        color: row.tagColor!
-                    }))
-            };
-        }, { requestId });
+        // Fetch the created book with tags
+        const createdBookWithTags = await db
+            .select({
+                id: books.id,
+                title: books.title,
+                author: books.author,
+                audibleUrl: books.audibleUrl,
+                narratorRating: books.narratorRating,
+                performanceRating: books.performanceRating,
+                description: books.description,
+                coverImageUrl: books.coverImageUrl,
+                queuePosition: books.queuePosition,
+                dateAdded: books.dateAdded,
+                highlyRatedFor: books.highlyRatedFor,
+                tagId: tags.id,
+                tagName: tags.name,
+                tagColor: tags.color
+            })
+            .from(books)
+            .leftJoin(bookTags, eq(books.id, bookTags.bookId))
+            .leftJoin(tags, eq(bookTags.tagId, tags.id))
+            .where(eq(books.id, bookId));
+
+        if (createdBookWithTags.length === 0) {
+            throw new Error('Failed to retrieve created book');
+        }
+
+        // Format the response
+        const book = {
+            id: createdBookWithTags[0].id,
+            title: createdBookWithTags[0].title,
+            author: createdBookWithTags[0].author,
+            audibleUrl: createdBookWithTags[0].audibleUrl,
+            narratorRating: createdBookWithTags[0].narratorRating,
+            performanceRating: createdBookWithTags[0].performanceRating,
+            description: createdBookWithTags[0].description,
+            coverImageUrl: createdBookWithTags[0].coverImageUrl,
+            queuePosition: createdBookWithTags[0].queuePosition,
+            dateAdded: new Date(createdBookWithTags[0].dateAdded),
+            highlyRatedFor: createdBookWithTags[0].highlyRatedFor,
+            tags: createdBookWithTags
+                .filter(row => row.tagId)
+                .map(row => ({
+                    id: row.tagId!,
+                    name: row.tagName!,
+                    color: row.tagColor!
+                }))
+        };
 
         ServerLogger.info(`Successfully created book: ${book.title}`, 'API_BOOKS_POST', requestId, {
             bookId: book.id

@@ -15,7 +15,6 @@ import {
     sanitizeErrorDetails,
     createApiError
 } from '$lib/server/utils/errors.js';
-import { executeTransaction, executeWithRetry } from '$lib/server/utils/database.js';
 
 const requestLogger = createRequestLogger();
 
@@ -44,33 +43,28 @@ export const GET: RequestHandler = async ({ params, request }) => {
             return json(errorResponse, { status: 400 });
         }
 
-        // Query book with its associated tags using retry logic
-        const bookWithTags = await executeWithRetry(
-            () => db
-                .select({
-                    id: books.id,
-                    title: books.title,
-                    author: books.author,
-                    audibleUrl: books.audibleUrl,
-                    narratorRating: books.narratorRating,
-                    performanceRating: books.performanceRating,
-                    description: books.description,
-                    coverImageUrl: books.coverImageUrl,
-                    queuePosition: books.queuePosition,
-                    dateAdded: books.dateAdded,
-                    highlyRatedFor: books.highlyRatedFor,
-                    tagId: tags.id,
-                    tagName: tags.name,
-                    tagColor: tags.color
-                })
-                .from(books)
-                .leftJoin(bookTags, eq(books.id, bookTags.bookId))
-                .leftJoin(tags, eq(bookTags.tagId, tags.id))
-                .where(eq(books.id, id)),
-            'SELECT_BOOK_BY_ID',
-            'books',
-            { requestId }
-        );
+        // Query book with its associated tags
+        const bookWithTags = await db
+            .select({
+                id: books.id,
+                title: books.title,
+                author: books.author,
+                audibleUrl: books.audibleUrl,
+                narratorRating: books.narratorRating,
+                performanceRating: books.performanceRating,
+                description: books.description,
+                coverImageUrl: books.coverImageUrl,
+                queuePosition: books.queuePosition,
+                dateAdded: books.dateAdded,
+                highlyRatedFor: books.highlyRatedFor,
+                tagId: tags.id,
+                tagName: tags.name,
+                tagColor: tags.color
+            })
+            .from(books)
+            .leftJoin(bookTags, eq(books.id, bookTags.bookId))
+            .leftJoin(tags, eq(bookTags.tagId, tags.id))
+            .where(eq(books.id, id));
 
         if (bookWithTags.length === 0) {
             ServerLogger.warn(`Book not found: ${id}`, 'API_BOOKS_GET_BY_ID', requestId);
@@ -185,126 +179,147 @@ export const PUT: RequestHandler = async ({ params, request }) => {
         const input = body as Partial<UpdateBookInput>;
         const now = new Date().toISOString();
 
-        // Use transaction to ensure data consistency
-        const book = executeTransaction((tx) => {
-            // Check if book exists
-            const existingBook = tx
-                .select()
-                .from(books)
-                .where(eq(books.id, id))
-                .limit(1)
-                .all();
+        // Check if book exists
+        const existingBook = await db
+            .select()
+            .from(books)
+            .where(eq(books.id, id))
+            .limit(1);
 
-            if (existingBook.length === 0) {
-                throw createApiError('BOOK_NOT_FOUND', 'Book not found', { bookId: id }, requestId);
-            }
+        if (existingBook.length === 0) {
+            ServerLogger.warn(`Book not found: ${id}`, 'API_BOOKS_PUT', requestId);
 
-            // Prepare update data (only include provided fields)
-            const updateData: any = {
-            };
+            const errorResponse = createErrorResponse(
+                'BOOK_NOT_FOUND',
+                'Book not found',
+                { bookId: id },
+                requestId
+            );
 
-            if (input.title !== undefined) updateData.title = input.title.trim();
-            if (input.author !== undefined) updateData.author = input.author.trim();
-            if (input.audibleUrl !== undefined) updateData.audibleUrl = input.audibleUrl?.trim() || null;
-            if (input.narratorRating !== undefined) updateData.narratorRating = input.narratorRating;
-            if (input.performanceRating !== undefined) updateData.performanceRating = input.performanceRating;
-            if (input.description !== undefined) updateData.description = input.description?.trim() || null;
-            if (input.coverImageUrl !== undefined) updateData.coverImageUrl = input.coverImageUrl?.trim() || null;
-            if (input.queuePosition !== undefined) updateData.queuePosition = input.queuePosition;
-            if (input.highlyRatedFor !== undefined) updateData.highlyRatedFor = input.highlyRatedFor?.trim() || null;
+            logRequest(404);
+            return json(errorResponse, { status: 404 });
+        }
 
-            // Update the book
-            tx.update(books).set(updateData).where(eq(books.id, id)).run();
+        // Prepare update data (only include provided fields)
+        const updateData: any = {};
 
-            // Handle tags if provided
-            if (input.tags !== undefined) {
-                // Remove existing tag relationships
-                tx.delete(bookTags).where(eq(bookTags.bookId, id)).run();
+        if (input.title !== undefined) updateData.title = input.title.trim();
+        if (input.author !== undefined) updateData.author = input.author.trim();
+        if (input.audibleUrl !== undefined) updateData.audibleUrl = input.audibleUrl?.trim() || null;
+        if (input.narratorRating !== undefined) updateData.narratorRating = input.narratorRating;
+        if (input.performanceRating !== undefined) updateData.performanceRating = input.performanceRating;
+        if (input.description !== undefined) updateData.description = input.description?.trim() || null;
+        if (input.coverImageUrl !== undefined) updateData.coverImageUrl = input.coverImageUrl?.trim() || null;
+        if (input.queuePosition !== undefined) updateData.queuePosition = input.queuePosition;
+        if (input.highlyRatedFor !== undefined) updateData.highlyRatedFor = input.highlyRatedFor?.trim() || null;
 
-                // Add new tag relationships
-                if (input.tags.length > 0) {
-                    const bookTagsToInsert = [];
-                    for (const tag of input.tags) {
-                        // Check if tag exists, create if not
-                        const existingTag = tx
-                            .select()
-                            .from(tags)
-                            .where(eq(tags.name, tag.name))
-                            .limit(1)
-                            .all();
+        // Update the book
+        if (Object.keys(updateData).length > 0) {
+            await db.update(books).set(updateData).where(eq(books.id, id));
+        }
 
-                        let tagId = tag.id;
-                        if (existingTag.length === 0) {
-                            // Create new tag
-                            tx.insert(tags).values({
+        // Handle tags if provided
+        if (input.tags !== undefined) {
+            // Remove existing tag relationships
+            await db.delete(bookTags).where(eq(bookTags.bookId, id));
+
+            // Add new tag relationships
+            if (input.tags.length > 0) {
+                const bookTagsToInsert = [];
+
+                for (const tag of input.tags) {
+                    // Check if tag exists
+                    const existingTag = await db
+                        .select()
+                        .from(tags)
+                        .where(eq(tags.name, tag.name))
+                        .limit(1);
+
+                    let tagId = tag.id;
+
+                    if (existingTag.length === 0) {
+                        // Tag doesn't exist, create it
+                        try {
+                            await db.insert(tags).values({
                                 id: tag.id,
                                 name: tag.name,
                                 color: tag.color,
                                 createdAt: now,
-                            }).run();
-                        } else {
-                            tagId = existingTag[0].id;
+                            });
+                        } catch (tagCreateError) {
+                            // If tag creation fails due to concurrent creation, fetch it
+                            const refetchedTag = await db
+                                .select()
+                                .from(tags)
+                                .where(eq(tags.name, tag.name))
+                                .limit(1);
+
+                            if (refetchedTag.length > 0) {
+                                tagId = refetchedTag[0].id;
+                            }
                         }
-
-                        bookTagsToInsert.push({
-                            bookId: id,
-                            tagId
-                        });
+                    } else {
+                        // Tag exists, use its ID
+                        tagId = existingTag[0].id;
                     }
 
-                    // Insert book-tag relationships
-                    if (bookTagsToInsert.length > 0) {
-                        tx.insert(bookTags).values(bookTagsToInsert).run();
-                    }
+                    bookTagsToInsert.push({
+                        bookId: id,
+                        tagId
+                    });
+                }
+
+                // Insert book-tag relationships
+                if (bookTagsToInsert.length > 0) {
+                    await db.insert(bookTags).values(bookTagsToInsert);
                 }
             }
+        }
 
-            // Fetch the updated book with tags
-            const updatedBookWithTags = tx
-                .select({
-                    id: books.id,
-                    title: books.title,
-                    author: books.author,
-                    audibleUrl: books.audibleUrl,
-                    narratorRating: books.narratorRating,
-                    performanceRating: books.performanceRating,
-                    description: books.description,
-                    coverImageUrl: books.coverImageUrl,
-                    queuePosition: books.queuePosition,
-                    dateAdded: books.dateAdded,
-                    highlyRatedFor: books.highlyRatedFor,
-                    tagId: tags.id,
-                    tagName: tags.name,
-                    tagColor: tags.color
-                })
-                .from(books)
-                .leftJoin(bookTags, eq(books.id, bookTags.bookId))
-                .leftJoin(tags, eq(bookTags.tagId, tags.id))
-                .where(eq(books.id, id))
-                .all();
+        // Fetch the updated book with tags
+        const updatedBookWithTags = await db
+            .select({
+                id: books.id,
+                title: books.title,
+                author: books.author,
+                audibleUrl: books.audibleUrl,
+                narratorRating: books.narratorRating,
+                performanceRating: books.performanceRating,
+                description: books.description,
+                coverImageUrl: books.coverImageUrl,
+                queuePosition: books.queuePosition,
+                dateAdded: books.dateAdded,
+                highlyRatedFor: books.highlyRatedFor,
+                tagId: tags.id,
+                tagName: tags.name,
+                tagColor: tags.color
+            })
+            .from(books)
+            .leftJoin(bookTags, eq(books.id, bookTags.bookId))
+            .leftJoin(tags, eq(bookTags.tagId, tags.id))
+            .where(eq(books.id, id));
 
-            // Format the response
-            return {
-                id: updatedBookWithTags[0].id,
-                title: updatedBookWithTags[0].title,
-                author: updatedBookWithTags[0].author,
-                audibleUrl: updatedBookWithTags[0].audibleUrl,
-                narratorRating: updatedBookWithTags[0].narratorRating,
-                performanceRating: updatedBookWithTags[0].performanceRating,
-                description: updatedBookWithTags[0].description,
-                coverImageUrl: updatedBookWithTags[0].coverImageUrl,
-                queuePosition: updatedBookWithTags[0].queuePosition,
-                dateAdded: new Date(updatedBookWithTags[0].dateAdded),
-                highlyRatedFor: updatedBookWithTags[0].highlyRatedFor,
-                tags: updatedBookWithTags
-                    .filter(row => row.tagId)
-                    .map(row => ({
-                        id: row.tagId!,
-                        name: row.tagName!,
-                        color: row.tagColor!
-                    }))
-            };
-        }, { requestId });
+        // Format the response
+        const book = {
+            id: updatedBookWithTags[0].id,
+            title: updatedBookWithTags[0].title,
+            author: updatedBookWithTags[0].author,
+            audibleUrl: updatedBookWithTags[0].audibleUrl,
+            narratorRating: updatedBookWithTags[0].narratorRating,
+            performanceRating: updatedBookWithTags[0].performanceRating,
+            description: updatedBookWithTags[0].description,
+            coverImageUrl: updatedBookWithTags[0].coverImageUrl,
+            queuePosition: updatedBookWithTags[0].queuePosition,
+            dateAdded: new Date(updatedBookWithTags[0].dateAdded),
+            highlyRatedFor: updatedBookWithTags[0].highlyRatedFor,
+            tags: updatedBookWithTags
+                .filter(row => row.tagId)
+                .map(row => ({
+                    id: row.tagId!,
+                    name: row.tagName!,
+                    color: row.tagColor!
+                }))
+        };
 
         ServerLogger.info(`Successfully updated book: ${book.title}`, 'API_BOOKS_PUT', requestId, {
             bookId: book.id
@@ -363,28 +378,34 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
             return json(errorResponse, { status: 400 });
         }
 
-        // Use transaction to ensure data consistency
-        const deletedBook = executeTransaction((tx) => {
-            // Check if book exists
-            const existingBook = tx
-                .select()
-                .from(books)
-                .where(eq(books.id, id))
-                .limit(1)
-                .all();
+        // Check if book exists
+        const existingBook = await db
+            .select()
+            .from(books)
+            .where(eq(books.id, id))
+            .limit(1);
 
-            if (existingBook.length === 0) {
-                throw createApiError('BOOK_NOT_FOUND', 'Book not found', { bookId: id }, requestId);
-            }
+        if (existingBook.length === 0) {
+            ServerLogger.warn(`Book not found: ${id}`, 'API_BOOKS_DELETE', requestId);
 
-            // Delete book-tag relationships (cascade should handle this, but being explicit)
-            tx.delete(bookTags).where(eq(bookTags.bookId, id)).run();
+            const errorResponse = createErrorResponse(
+                'BOOK_NOT_FOUND',
+                'Book not found',
+                { bookId: id },
+                requestId
+            );
 
-            // Delete the book
-            tx.delete(books).where(eq(books.id, id)).run();
+            logRequest(404);
+            return json(errorResponse, { status: 404 });
+        }
 
-            return existingBook[0];
-        }, { requestId });
+        // Delete book-tag relationships (cascade should handle this, but being explicit)
+        await db.delete(bookTags).where(eq(bookTags.bookId, id));
+
+        // Delete the book
+        await db.delete(books).where(eq(books.id, id));
+
+        const deletedBook = existingBook[0];
 
         ServerLogger.info(`Successfully deleted book: ${deletedBook.title}`, 'API_BOOKS_DELETE', requestId, {
             bookId: deletedBook.id

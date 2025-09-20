@@ -14,7 +14,6 @@ import {
     getErrorStatus,
     sanitizeErrorDetails
 } from '$lib/server/utils/errors.js';
-import { executeWithRetry } from '$lib/server/utils/database.js';
 
 const requestLogger = createRequestLogger();
 
@@ -26,24 +25,19 @@ export const GET: RequestHandler = async ({ request }) => {
     try {
         ServerLogger.info('Fetching all tags', 'API_TAGS_GET', requestId);
 
-        // Query tags with their usage count using retry logic
-        const tagsWithCount = await executeWithRetry(
-            () => db
-                .select({
-                    id: tags.id,
-                    name: tags.name,
-                    color: tags.color,
-                    createdAt: tags.createdAt,
-                    usageCount: sql<number>`count(${bookTags.bookId})`.as('usage_count')
-                })
-                .from(tags)
-                .leftJoin(bookTags, eq(tags.id, bookTags.tagId))
-                .groupBy(tags.id, tags.name, tags.color, tags.createdAt)
-                .orderBy(desc(sql`usage_count`), tags.name),
-            'SELECT_TAGS_WITH_COUNT',
-            'tags',
-            { requestId }
-        );
+        // Query tags with their usage count
+        const tagsWithCount = await db
+            .select({
+                id: tags.id,
+                name: tags.name,
+                color: tags.color,
+                createdAt: tags.createdAt,
+                usageCount: sql<number>`count(${bookTags.bookId})`.as('usage_count')
+            })
+            .from(tags)
+            .leftJoin(bookTags, eq(tags.id, bookTags.tagId))
+            .groupBy(tags.id, tags.name, tags.color, tags.createdAt)
+            .orderBy(desc(sql`usage_count`), tags.name);
 
         const result = tagsWithCount.map(tag => ({
             id: tag.id,
@@ -114,16 +108,11 @@ export const POST: RequestHandler = async ({ request }) => {
         const now = new Date().toISOString();
 
         // Check if tag with this name already exists
-        const existingTag = await executeWithRetry(
-            () => db
-                .select()
-                .from(tags)
-                .where(eq(tags.name, input.name))
-                .limit(1),
-            'CHECK_TAG_EXISTS',
-            'tags',
-            { requestId }
-        );
+        const existingTag = await db
+            .select()
+            .from(tags)
+            .where(eq(tags.name, input.name))
+            .limit(1);
 
         if (existingTag.length > 0) {
             ServerLogger.warn(`Tag already exists: ${input.name}`, 'API_TAGS_POST', requestId);
@@ -143,29 +132,19 @@ export const POST: RequestHandler = async ({ request }) => {
         const tagId = input.id || generateId();
 
         // Insert the tag
-        await executeWithRetry(
-            () => db.insert(tags).values({
-                id: tagId,
-                name: input.name.trim(),
-                color: input.color.trim(),
-                createdAt: now
-            }),
-            'INSERT_TAG',
-            'tags',
-            { requestId }
-        );
+        await db.insert(tags).values({
+            id: tagId,
+            name: input.name.trim(),
+            color: input.color.trim(),
+            createdAt: now
+        });
 
         // Fetch the created tag
-        const createdTag = await executeWithRetry(
-            () => db
-                .select()
-                .from(tags)
-                .where(eq(tags.id, tagId))
-                .limit(1),
-            'SELECT_CREATED_TAG',
-            'tags',
-            { requestId }
-        );
+        const createdTag = await db
+            .select()
+            .from(tags)
+            .where(eq(tags.id, tagId))
+            .limit(1);
 
         const result = {
             id: createdTag[0].id,

@@ -7,17 +7,49 @@ import { env } from '$env/dynamic/private';
 function getDbPath() {
     // Check for Railway volume path first
     if (env.RAILWAY_VOLUME_MOUNT_PATH) {
-        return `${env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+        const railwayDbPath = `${env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+
+        // Validate Railway volume mount path exists
+        try {
+            const fs = require('fs');
+            const path = require('path');
+
+            // Check if the mount path directory exists
+            if (!fs.existsSync(env.RAILWAY_VOLUME_MOUNT_PATH)) {
+                console.warn(`Railway volume mount path does not exist: ${env.RAILWAY_VOLUME_MOUNT_PATH}`);
+                console.warn('Falling back to local database path');
+                return 'prod.db';
+            }
+
+            // Check if directory is writable
+            try {
+                fs.accessSync(env.RAILWAY_VOLUME_MOUNT_PATH, fs.constants.W_OK);
+            } catch (accessError) {
+                console.warn(`Railway volume mount path is not writable: ${env.RAILWAY_VOLUME_MOUNT_PATH}`);
+                console.warn('Falling back to local database path');
+                return 'prod.db';
+            }
+
+            console.log(`Using Railway volume database path: ${railwayDbPath}`);
+            return railwayDbPath;
+        } catch (error) {
+            console.error('Error validating Railway volume path:', error);
+            console.warn('Falling back to local database path');
+            return 'prod.db';
+        }
     }
 
     // Check for custom database path
     if (env.DATABASE_PATH) {
+        console.log(`Using custom database path: ${env.DATABASE_PATH}`);
         return env.DATABASE_PATH;
     }
 
     // Default to dev mode
     const isDev = env.NODE_ENV !== 'production';
-    return isDev ? 'dev.db' : 'prod.db';
+    const defaultPath = isDev ? 'dev.db' : 'prod.db';
+    console.log(`Using default database path: ${defaultPath} (isDev: ${isDev})`);
+    return defaultPath;
 }
 
 const dbPath = getDbPath();
