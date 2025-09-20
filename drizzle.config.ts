@@ -1,20 +1,25 @@
 import { defineConfig } from 'drizzle-kit';
 
-// Get database path based on environment
+// Get database path based on environment - must match the unified path logic
 function getDbPath() {
     // Check for Railway volume path first
     if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
-        return `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+        const railwayPath = `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+        console.log(`🔧 Drizzle using Railway volume path: ${railwayPath}`);
+        return railwayPath;
     }
 
     // Check for custom database path
     if (process.env.DATABASE_PATH) {
+        console.log(`🔧 Drizzle using DATABASE_PATH: ${process.env.DATABASE_PATH}`);
         return process.env.DATABASE_PATH;
     }
 
     // Default to dev mode
     const isDev = process.env.NODE_ENV !== 'production';
-    return isDev ? './dev.db' : './prod.db';
+    const defaultPath = isDev ? './dev.db' : './prod.db';
+    console.log(`🔧 Drizzle using default path: ${defaultPath} (NODE_ENV: ${process.env.NODE_ENV || 'undefined'})`);
+    return defaultPath;
 }
 
 export default defineConfig({

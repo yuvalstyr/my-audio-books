@@ -31,21 +31,29 @@ function validateEnvironment() {
     }
 }
 
-// Get database path with enhanced logic
+// Get database path with enhanced logic - MUST match application logic exactly
 function getDbPath() {
     let dbPath;
+    let source;
 
+    // Check for Railway volume path first (highest priority)
     if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
         dbPath = `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
-        console.log('📁 Using Railway volume mount for database');
+        source = 'RAILWAY_VOLUME_MOUNT_PATH';
+        console.log(`📁 Railway-init using Railway volume path: ${dbPath}`);
     } else if (process.env.DATABASE_PATH) {
         dbPath = process.env.DATABASE_PATH;
-        console.log('📁 Using DATABASE_PATH environment variable');
+        source = 'DATABASE_PATH';
+        console.log(`📁 Railway-init using DATABASE_PATH: ${dbPath}`);
     } else {
-        dbPath = './prod.db';
-        console.log('📁 Using default database path');
+        // Default based on environment (fallback)
+        const isDev = process.env.NODE_ENV !== 'production';
+        dbPath = isDev ? './dev.db' : './prod.db';
+        source = 'DEFAULT';
+        console.log(`📁 Railway-init using default path: ${dbPath} (NODE_ENV: ${process.env.NODE_ENV || 'undefined'})`);
     }
 
+    console.log(`🗃️  RAILWAY-INIT DB PATH: ${dbPath} (source: ${source})`);
     return dbPath;
 }
 
