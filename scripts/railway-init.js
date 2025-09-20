@@ -97,63 +97,30 @@ async function checkDatabaseExists(dbPath) {
     }
 }
 
-// Run database migrations with better error handling
+// Run database migrations with safe incremental approach
 async function runMigrations(dbPath) {
     console.log('🔄 Setting up database schema...');
 
-    const hasExistingTables = await checkDatabaseExists(dbPath);
+    try {
+        // Always use incremental migration approach - it handles both new and existing databases
+        await executeIncrementalMigrations(dbPath);
+        console.log('✅ Database migrations completed successfully');
 
-    if (hasExistingTables) {
-        console.log('📋 Existing database detected, using schema push instead of migrations');
+    } catch (error) {
+        console.error('❌ Database migration failed:', error.message);
 
-        try {
-            // For existing databases, use push to sync schema safely with auto-approval
-            execSync('npx drizzle-kit push --force', { stdio: 'inherit' });
-            console.log('✅ Database schema synchronized successfully');
-        } catch (pushError) {
-            console.log('⚠️  Schema push failed, this may be normal if schema is already up to date');
-            console.log('🔄 Continuing with startup...');
+        // Provide helpful error information
+        if (error.message.includes('ENOENT')) {
+            console.error('💡 Hint: Migration files not found - check if drizzle directory exists');
+        } else if (error.message.includes('permission')) {
+            console.error('💡 Hint: Check database directory permissions');
+        } else if (error.message.includes('locked')) {
+            console.error('💡 Hint: Database may be locked by another process');
+        } else if (error.message.includes('no such table')) {
+            console.error('💡 Hint: Database exists but tables are missing - this is normal for first run');
         }
-    } else {
-        console.log('🆕 New database detected, running initial setup');
 
-        try {
-            // Skip generation in production - migrations should be pre-generated
-            if (process.env.NODE_ENV !== 'production') {
-                try {
-                    execSync('npm run db:generate', { stdio: 'pipe' });
-                    console.log('📋 Migration generation completed');
-                } catch (genError) {
-                    console.log('ℹ️  No new migrations to generate (this is normal)');
-                }
-            } else {
-                console.log('🏭 Production mode: using pre-generated migrations');
-            }
-
-            // For new databases, try migrations first, fall back to push
-            try {
-                execSync('npm run db:migrate', { stdio: 'inherit' });
-                console.log('✅ Database migrations completed successfully');
-            } catch (migrateError) {
-                console.log('⚠️  Migration failed, trying schema push as fallback');
-                execSync('npx drizzle-kit push --force', { stdio: 'inherit' });
-                console.log('✅ Database schema created successfully');
-            }
-
-        } catch (error) {
-            console.error('❌ Database setup failed:', error.message);
-
-            // Try to provide more helpful error information
-            if (error.message.includes('ENOENT')) {
-                console.error('💡 Hint: Make sure drizzle-kit is installed and migration files exist');
-            } else if (error.message.includes('permission')) {
-                console.error('💡 Hint: Check database directory permissions');
-            } else if (error.message.includes('locked')) {
-                console.error('💡 Hint: Database may be locked by another process');
-            }
-
-            throw error;
-        }
+        throw error;
     }
 }
 
@@ -208,6 +175,117 @@ function createHealthCheck() {
         console.log('✅ Initialization marker created');
     } catch (error) {
         console.log('⚠️  Could not create initialization marker:', error.message);
+    }
+}
+
+// Safe incremental migration execution
+async function executeIncrementalMigrations(dbPath) {
+    console.log('🔧 Executing incremental migrations...');
+
+    try {
+        const { readFileSync, readdirSync } = await import('fs');
+        const { join } = await import('path');
+        const Database = (await import('better-sqlite3')).default;
+
+        const db = new Database(dbPath);
+
+        // Create migrations tracking table if it doesn't exist
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS _migrations (
+                id TEXT PRIMARY KEY,
+                applied_at TEXT NOT NULL
+            )
+        `);
+
+        // Check if this is an existing database that needs migration tracking setup
+        const existingTables = db.prepare(`
+            SELECT name FROM sqlite_master
+            WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != '_migrations'
+        `).all().map(row => row.name);
+
+        console.log(`📋 Existing tables in database: ${existingTables.join(', ') || 'none'}`);
+
+        // Get applied migrations
+        const appliedMigrations = new Set(
+            db.prepare('SELECT id FROM _migrations').all().map(row => row.id)
+        );
+
+        // If database has tables but no migration records, mark appropriate migrations as applied
+        if (existingTables.length > 0 && appliedMigrations.size === 0) {
+            console.log('🔧 Detected existing database without migration tracking, setting up...');
+
+            // If we have the main tables (books, tags, book_tags), mark the base migration as applied
+            const expectedBaseTables = ['books', 'tags', 'book_tags'];
+            const hasBaseTables = expectedBaseTables.every(table => existingTables.includes(table));
+
+            if (hasBaseTables) {
+                console.log('📋 Base tables exist, marking initial migration (0000) as applied');
+                db.prepare('INSERT INTO _migrations (id, applied_at) VALUES (?, ?)').run(
+                    '0000_parched_sandman',
+                    new Date().toISOString()
+                );
+                appliedMigrations.add('0000_parched_sandman');
+            }
+        }
+
+        console.log(`📋 Already applied migrations: ${appliedMigrations.size}`);
+
+        // Get all migration files in order
+        const migrationDir = './drizzle';
+        const allMigrationFiles = readdirSync(migrationDir)
+            .filter(file => file.endsWith('.sql'))
+            .sort(); // This will sort 0000_, 0001_, etc. in order
+
+        // Filter to only pending migrations
+        const pendingMigrations = allMigrationFiles.filter(file => {
+            const migrationId = file.replace('.sql', '');
+            return !appliedMigrations.has(migrationId);
+        });
+
+        console.log(`📋 Found ${allMigrationFiles.length} total migrations, ${pendingMigrations.length} pending:`, pendingMigrations);
+
+        if (pendingMigrations.length === 0) {
+            console.log('✅ All migrations already applied, database is up to date');
+            db.close();
+            return;
+        }
+
+        // Execute pending migrations
+        const insertMigration = db.prepare('INSERT INTO _migrations (id, applied_at) VALUES (?, ?)');
+
+        for (const file of pendingMigrations) {
+            console.log(`🔄 Executing migration: ${file}`);
+            const migrationPath = join(migrationDir, file);
+            const sql = readFileSync(migrationPath, 'utf8');
+            const migrationId = file.replace('.sql', '');
+
+            try {
+                // Split by statement separator and execute each statement
+                const statements = sql.split('--> statement-breakpoint').filter(stmt => stmt.trim());
+
+                for (const statement of statements) {
+                    const cleanStatement = statement.trim();
+                    if (cleanStatement) {
+                        db.exec(cleanStatement);
+                    }
+                }
+
+                // Mark migration as applied
+                insertMigration.run(migrationId, new Date().toISOString());
+                console.log(`✅ Migration ${file} completed successfully`);
+
+            } catch (migrationError) {
+                console.error(`❌ Migration ${file} failed:`, migrationError.message);
+                throw migrationError;
+            }
+        }
+
+        db.close();
+        console.log(`✅ Applied ${pendingMigrations.length} migrations successfully`);
+
+    } catch (error) {
+        console.error('❌ Incremental migration failed:', error.message);
+        throw error;
     }
 }
 

@@ -1,0 +1,89 @@
+
+```json
+{
+  "books": [
+    {
+      "title": "Six of Crows",
+      "author": "Leigh Bardugo",
+      "audibleUrl": "https://www.audible.com/pd/Six-of-Crows-Audiobook/B012BNY8RY?ref_pageloadid=h5pnNyzkElSrdeQf&pf_rd_p=95b555b2-2931-4812-98e1-6535e764d43f&pf_rd_r=Z8WEX5DZM526DE1RA7NA&plink=8RjGlAcASuAZAb0I&pageLoadId=pUbdRbzgq7Q0midl&creativeId=b5fa8602-fb94-432a-aacc-e3734bed4f97&ref=a_library_w_c5_prod_1",
+      "narratorRating": 4.6,
+      "performanceRating": 4.6,
+      "tags": [
+        {
+          "id": "1",
+          "name": "Fantasy",
+          "color": "badge-success"
+        }
+      ],
+      "id": "1757681659521-1",
+      "dateAdded": "2025-09-14T00:00:00.000Z"
+    },
+    {
+      "title": "Three Men in a Boat (To Say Nothing of the Dog)",
+      "author": "Jerome K. Jerome",
+      "audibleUrl": "https://www.audible.com/pd/Three-Men-in-a-Boat-To-Say-Nothing-of-the-Dog-Audiobook/B004P95AYI?ref_pageloadid=h5pnNyzkElSrdeQf&pf_rd_p=95b555b2-2931-4812-98e1-6535e764d43f&pf_rd_r=Z8WEX5DZM526DE1RA7NA&plink=8RjGlAcASuAZAb0I&pageLoadId=pUbdRbzgq7Q0midl&creativeId=b5fa8602-fb94-432a-aacc-e3734bed4f97&ref=a_library_w_c5_prod_2",
+      "narratorRating": 4.6,
+      "performanceRating": 4.5,
+      "tags": [
+        {
+          "id": "2",
+          "name": "Classic",
+          "color": "badge-primary"
+        }
+      ],
+      "id": "1757681659521-2",
+      "dateAdded": "2025-09-14T00:00:00.000Z"
+    },
+    {
+      "title": "The Princess Bride",
+      "author": "William Goldman",
+      "audibleUrl": "https://www.audible.com/pd/The-Princess-Bride-Audiobook/B09NLG87J7?ref_pageloadid=h5pnNyzkElSrdeQf&pf_rd_p=95b555b2-2931-4812-98e1-6535e764d43f&pf_rd_r=Z8WEX5DZM526DE1RA7NA&plink=8RjGlAcASuAZAb0I&pageLoadId=pUbdRbzgq7Q0midl&creativeId=b5fa8602-fb94-432a-aacc-e3734bed4f97&ref=a_library_w_c5_prod_3",
+      "narratorRating": 4.5,
+      "performanceRating": 4.6,
+      "tags": [
+        {
+          "id": "3",
+          "name": "Adventure",
+          "color": "badge-success"
+        }
+      ],
+      "id": "1757681659521-3",
+      "dateAdded": "2025-09-14T00:00:00.000Z"
+    },
+    {
+      "title": "Is Everyone Hanging Out Without Me? (And Other Concerns)",
+      "author": "Mindy Kaling",
+      "audibleUrl": "https://www.audible.com/pd/Is-Everyone-Hanging-Out-Without-Me-And-Other-Concerns-Audiobook/B005V2HRA8?ref_pageloadid=h5pnNyzkElSrdeQf&pf_rd_p=95b555b2-2931-4812-98e1-6535e764d43f&pf_rd_r=Z8WEX5DZM526DE1RA7NA&plink=8RjGlAcASuAZAb0I&pageLoadId=pUbdRbzgq7Q0midl&creativeId=b5fa8602-fb94-432a-aacc-e3734bed4f97&ref=a_library_w_c5_prod_4",
+      "narratorRating": 4.6,
+      "performanceRating": 4.2,
+      "tags": [
+        {
+          "id": "4",
+          "name": "Memoir",
+          "color": "badge-primary"
+        }
+      ],
+      "id": "1757681659521-4",
+      "dateAdded": "2025-09-14T00:00:00.000Z"
+    },
+    {
+      "title": "Anxious People",
+      "author": "Fredrik Backman",
+      "audibleUrl": "https://www.audible.com/pd/Anxious-People-Audiobook/1797105833?ref_pageloadid=h5pnNyzkElSrdeQf&pf_rd_p=95b555b2-2931-4812-98e1-6535e764d43f&pf_rd_r=Z8WEX5DZM526DE1RA7NA&plink=8RjGlAcASuAZAb0I&pageLoadId=pUbdRbzgq7Q0midl&creativeId=b5fa8602-fb94-432a-aacc-e3734bed4f97&ref=a_library_w_c5_prod_5",
+      "narratorRating": 4.7,
+      "performanceRating": 4.6,
+      "tags": [
+        {
+          "id": "5",
+          "name": "Fiction",
+          "color": "badge-success"
+        }
+      ],
+      "id": "1757681659521-5",
+      "dateAdded": "2025-09-14T00:00:00.000Z"
+    }
+  ],
+  "lastUpdated": "2025-09-14T00:00:00.000Z"
+}
+```
+
