@@ -232,9 +232,16 @@ async function executeIncrementalMigrations(dbPath) {
 
         // Get all migration files in order
         const migrationDir = './drizzle';
-        const allMigrationFiles = readdirSync(migrationDir)
-            .filter(file => file.endsWith('.sql'))
-            .sort(); // This will sort 0000_, 0001_, etc. in order
+        let allMigrationFiles = [];
+
+        try {
+            allMigrationFiles = readdirSync(migrationDir)
+                .filter(file => file.endsWith('.sql'))
+                .sort(); // This will sort 0000_, 0001_, etc. in order
+        } catch (dirError) {
+            console.error('❌ Could not read migration directory:', dirError.message);
+            throw new Error(`Migration directory not found: ${migrationDir}`);
+        }
 
         // Filter to only pending migrations
         const pendingMigrations = allMigrationFiles.filter(file => {
@@ -292,6 +299,10 @@ async function executeIncrementalMigrations(dbPath) {
 // Main initialization process
 async function initialize() {
     try {
+        console.log('📝 NODE_ENV:', process.env.NODE_ENV);
+        console.log('📝 RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH ? 'SET' : 'NOT SET');
+        console.log('📝 DATABASE_PATH:', process.env.DATABASE_PATH || 'NOT SET');
+
         validateEnvironment();
 
         const dbPath = getDbPath();
@@ -305,7 +316,15 @@ async function initialize() {
 
     } catch (error) {
         console.error('💥 Railway initialization failed:', error.message);
+        console.error('🔧 Error stack:', error.stack);
         console.error('🔧 Please check the logs above for specific error details');
+
+        // In production, try to continue without failing completely
+        if (process.env.NODE_ENV === 'production') {
+            console.log('⚠️  Continuing startup despite initialization error (production mode)');
+            return;
+        }
+
         process.exit(1);
     }
 }
