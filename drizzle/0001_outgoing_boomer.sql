@@ -1,0 +1,1 @@
+ALTER TABLE `books` ADD `highly_rated_for` text;

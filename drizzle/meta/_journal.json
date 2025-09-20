@@ -8,6 +8,13 @@
       "when": 1757784464671,
       "tag": "0000_parched_sandman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1758387715577,
+      "tag": "0001_outgoing_boomer",
+      "breakpoints": true
     }
   ]
 }
