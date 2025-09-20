@@ -2,7 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { ServerLogger, createRequestLogger } from '$lib/server/utils/logger.js';
 import { createSuccessResponse, createErrorResponse } from '$lib/server/utils/errors.js';
-import { getDatabaseStats, validateDatabaseConnection } from '$lib/server/utils/database.js';
+import { db } from '$lib/server/db/connection.js';
+import { books, tags, bookTags } from '$lib/server/db/schema.js';
+import { sql } from 'drizzle-orm';
 
 const requestLogger = createRequestLogger();
 
@@ -227,3 +229,39 @@ export const POST: RequestHandler = async ({ request }) => {
         });
     }
 };
+
+// Helper functions to replace the deleted database utils
+async function validateDatabaseConnection(): Promise<boolean> {
+    try {
+        await db.select({ test: sql`1` }).limit(1);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+async function getDatabaseStats() {
+    try {
+        const [booksCount, tagsCount, bookTagsCount] = await Promise.all([
+            db.select({ count: sql<number>`count(*)` }).from(books),
+            db.select({ count: sql<number>`count(*)` }).from(tags),
+            db.select({ count: sql<number>`count(*)` }).from(bookTags)
+        ]);
+
+        const totalRecords = (booksCount[0]?.count || 0) + (tagsCount[0]?.count || 0) + (bookTagsCount[0]?.count || 0);
+
+        return {
+            isConnected: true,
+            tableCount: 3,
+            totalRecords,
+            error: null
+        };
+    } catch (error) {
+        return {
+            isConnected: false,
+            tableCount: 0,
+            totalRecords: 0,
+            error: (error as Error).message
+        };
+    }
+}

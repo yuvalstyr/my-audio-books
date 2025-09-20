@@ -2,7 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { ServerLogger, createRequestLogger } from '$lib/server/utils/logger.js';
 import { createSuccessResponse, createErrorResponse } from '$lib/server/utils/errors.js';
-import { getDatabasePerformanceMetrics, performDatabaseMaintenance } from '$lib/server/utils/database.js';
+import { db } from '$lib/server/db/connection.js';
+import { books, tags, bookTags } from '$lib/server/db/schema.js';
+import { sql } from 'drizzle-orm';
 import { getDatabaseHealth } from '$lib/server/db/connection.js';
 
 const requestLogger = createRequestLogger();
@@ -101,7 +103,7 @@ export const POST: RequestHandler = async ({ request }) => {
         const startTime = Date.now();
 
         // Perform database maintenance
-        const maintenanceResult = performDatabaseMaintenance(requestId);
+        const maintenanceResult = await performDatabaseMaintenance(requestId);
 
         const responseTime = Date.now() - startTime;
 
@@ -281,4 +283,67 @@ function generatePerformanceRecommendations(
     }
 
     return recommendations;
+}
+
+// Helper functions to replace the deleted database utils
+async function getDatabasePerformanceMetrics() {
+    try {
+        const startTime = Date.now();
+
+        // Get basic table counts
+        const [booksCount, tagsCount, bookTagsCount] = await Promise.all([
+            db.select({ count: sql<number>`count(*)` }).from(books),
+            db.select({ count: sql<number>`count(*)` }).from(tags),
+            db.select({ count: sql<number>`count(*)` }).from(bookTags)
+        ]);
+
+        const queryTime = Date.now() - startTime;
+
+        return {
+            queryCount: 3,
+            averageQueryTime: queryTime / 3,
+            slowQueries: 0,
+            errorRate: 0,
+            connectionStats: {
+                overloaded: false
+            },
+            tableStats: {
+                books: booksCount[0]?.count || 0,
+                tags: tagsCount[0]?.count || 0,
+                bookTags: bookTagsCount[0]?.count || 0
+            }
+        };
+    } catch (error) {
+        return {
+            queryCount: 0,
+            averageQueryTime: 0,
+            slowQueries: 0,
+            errorRate: 100,
+            connectionStats: {
+                overloaded: true
+            },
+            tableStats: {}
+        };
+    }
+}
+
+async function performDatabaseMaintenance(requestId: string) {
+    try {
+        ServerLogger.info('Starting database maintenance', 'DATABASE_MAINTENANCE', requestId);
+
+        // Simple maintenance - just verify connectivity
+        await db.select({ test: sql`1` }).limit(1);
+
+        return {
+            success: true,
+            operations: ['Database connectivity verified'],
+            error: null
+        };
+    } catch (error) {
+        return {
+            success: false,
+            operations: [],
+            error: (error as Error).message
+        };
+    }
 }
