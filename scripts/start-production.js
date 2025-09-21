@@ -7,6 +7,12 @@
 import { spawn } from 'child_process';
 
 console.log('🚀 Starting production application...');
+console.log('🌍 Environment variables:');
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  DATABASE_PATH:', process.env.DATABASE_PATH);
+console.log('  RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH);
+console.log('  PORT:', process.env.PORT);
+console.log('  HOST:', process.env.HOST);
 
 // Function to run railway init with timeout
 async function runRailwayInit() {
