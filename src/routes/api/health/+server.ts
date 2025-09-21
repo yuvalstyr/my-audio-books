@@ -233,9 +233,11 @@ export const POST: RequestHandler = async ({ request }) => {
 // Helper functions to replace the deleted database utils
 async function validateDatabaseConnection(): Promise<boolean> {
     try {
-        await db.select({ test: sql`1` }).limit(1);
+        // Use a simpler query that's guaranteed to work
+        const result = await db.select().from(books).limit(1);
         return true;
     } catch (error) {
+        console.error('❌ Database validation failed:', (error as Error).message);
         return false;
     }
 }
