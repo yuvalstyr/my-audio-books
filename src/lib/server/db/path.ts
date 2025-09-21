@@ -4,56 +4,70 @@
  */
 
 import { env } from '$env/dynamic/private';
+import { existsSync, statSync } from 'fs';
 
 export function getUnifiedDbPath(): string {
-    let resolvedPath: string;
-    let source: string;
-
-    // Check for Railway volume path first (highest priority)
-    if (env.RAILWAY_VOLUME_MOUNT_PATH) {
-        resolvedPath = `${env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
-        source = 'RAILWAY_VOLUME_MOUNT_PATH';
-
-        // Validate Railway volume mount path exists
+    // In production, try multiple Railway-specific paths where the database might exist
+    if (env.NODE_ENV === 'production') {
         try {
-            const fs = require('fs');
 
-            // Check if the mount path directory exists
-            if (!fs.existsSync(env.RAILWAY_VOLUME_MOUNT_PATH)) {
-                console.warn(`⚠️  Railway volume mount path does not exist: ${env.RAILWAY_VOLUME_MOUNT_PATH}`);
-                console.warn('⚠️  Falling back to DATABASE_PATH or default');
-            } else {
-                // Check if directory is writable
-                try {
-                    fs.accessSync(env.RAILWAY_VOLUME_MOUNT_PATH, fs.constants.W_OK);
-                    console.log(`✅ Using Railway volume database: ${resolvedPath}`);
-                    return resolvedPath;
-                } catch (accessError) {
-                    console.warn(`⚠️  Railway volume mount path is not writable: ${env.RAILWAY_VOLUME_MOUNT_PATH}`);
-                    console.warn('⚠️  Falling back to DATABASE_PATH or default');
+        // Common Railway volume mount paths to check
+        const potentialPaths = [
+            // Standard Railway volume mount
+            env.RAILWAY_VOLUME_MOUNT_PATH ? `${env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db` : null,
+            // Custom DATABASE_PATH
+            env.DATABASE_PATH,
+            // Common Railway volume paths
+            '/data/audiobook-wishlist.db',
+            '/app/data/audiobook-wishlist.db',
+            '/railway-volume/audiobook-wishlist.db',
+            // Legacy paths
+            './audiobook-wishlist.db',
+            './prod.db'
+        ].filter(Boolean);
+
+        console.log(`🔍 Production mode: checking ${potentialPaths.length} potential database paths...`);
+
+            // Check each path and use the first one that exists and has data
+            for (const path of potentialPaths) {
+                if (path && existsSync(path)) {
+                    try {
+                        const stats = statSync(path);
+                        if (stats.size > 1024) { // Database should be > 1KB if it has data
+                            console.log(`✅ Found database with data: ${path} (${Math.round(stats.size/1024)}KB)`);
+                            return path;
+                        } else {
+                            console.log(`⚠️  Found empty database: ${path} (${stats.size} bytes) - skipping`);
+                        }
+                    } catch (error) {
+                        console.log(`⚠️  Cannot access ${path}: ${(error as Error).message}`);
+                    }
                 }
             }
         } catch (error) {
-            console.error('❌ Error validating Railway volume path:', error);
-            console.warn('⚠️  Falling back to DATABASE_PATH or default');
+            console.warn('⚠️  Error scanning for database:', (error as Error).message);
+        }
+
+        console.warn('⚠️  No existing database found, using Railway volume path or default');
+
+        // Fallback to Railway volume or default
+        if (env.RAILWAY_VOLUME_MOUNT_PATH) {
+            const railwayPath = `${env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+            console.log(`📁 Using Railway volume fallback: ${railwayPath}`);
+            return railwayPath;
         }
     }
 
-    // Check for custom database path (second priority)
+    // Development or fallback logic
     if (env.DATABASE_PATH) {
-        resolvedPath = env.DATABASE_PATH;
-        source = 'DATABASE_PATH';
-        console.log(`✅ Using custom database path: ${resolvedPath}`);
-        return resolvedPath;
+        console.log(`✅ Using DATABASE_PATH: ${env.DATABASE_PATH}`);
+        return env.DATABASE_PATH;
     }
 
-    // Default based on environment (fallback)
     const isDev = env.NODE_ENV !== 'production';
-    resolvedPath = isDev ? 'dev.db' : 'prod.db';
-    source = 'DEFAULT';
-
-    console.log(`✅ Using default database path: ${resolvedPath} (NODE_ENV: ${env.NODE_ENV || 'undefined'})`);
-    return resolvedPath;
+    const defaultPath = isDev ? 'dev.db' : 'prod.db';
+    console.log(`✅ Using default path: ${defaultPath} (NODE_ENV: ${env.NODE_ENV || 'undefined'})`);
+    return defaultPath;
 }
 
 // Log the resolved path when this module is imported
