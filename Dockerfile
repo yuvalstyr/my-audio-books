@@ -25,5 +25,5 @@ ENV HOST=0.0.0.0
 # Expose port (Railway will override this)
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "run", "start"]
+# Start the application with migration initialization
+CMD ["sh", "-c", "npm run railway:init && npm run start"]
