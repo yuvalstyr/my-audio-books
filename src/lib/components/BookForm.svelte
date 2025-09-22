@@ -162,6 +162,10 @@
                 tags: tags.length > 0 ? tags : undefined,
             };
 
+            // Debug: Log the book data being sent
+            console.log("📤 Sending book data:", bookData);
+            console.log("📝 highlyRatedFor value:", bookData.highlyRatedFor);
+
             // Validate the complete book data
             if (!isValidCreateBookInput(bookData)) {
                 console.error("Validation failed for book data:", bookData);
@@ -170,13 +174,16 @@
 
             if (isEditMode && book) {
                 // Edit mode - include the existing book ID
+                const finalBookData = {
+                    ...bookData,
+                    id: book.id,
+                    dateAdded: book.dateAdded,
+                    queuePosition: book.queuePosition,
+                };
+                console.log("📦 Final dispatched book data:", finalBookData);
+                console.log("📝 Final highlyRatedFor:", finalBookData.highlyRatedFor);
                 dispatch("save", {
-                    book: {
-                        ...bookData,
-                        id: book.id,
-                        dateAdded: book.dateAdded,
-                        queuePosition: book.queuePosition,
-                    },
+                    book: finalBookData,
                 });
             } else {
                 // Add mode - dispatch CreateBookInput
