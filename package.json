@@ -27,7 +27,8 @@
 		"db:studio": "drizzle-kit studio",
 		"db:seed": "npx tsx scripts/seed-db.ts",
 		"railway:init": "node scripts/railway-init.js",
-		"verify:deployment": "node scripts/verify-deployment.js"
+		"verify:deployment": "node scripts/verify-deployment.js",
+		"migrations:check": "node scripts/check-migrations.js"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.0.0",
