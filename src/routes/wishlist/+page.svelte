@@ -130,6 +130,7 @@
             performanceRating: updatedBook.performanceRating,
             description: updatedBook.description,
             coverImageUrl: updatedBook.coverImageUrl,
+            highlyRatedFor: updatedBook.highlyRatedFor,
         });
 
         if (result) {
@@ -291,21 +292,6 @@
         window.addEventListener('open-add-book-modal', handleAddBookEvent);
         window.addEventListener('toggle-filters', handleToggleFiltersEvent);
 
-        // Prefetch performance data in the background (non-blocking)
-        fetch("/api/performance")
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    ErrorLogger.debug(
-                        "Performance metrics loaded",
-                        "WishlistPage.preloadPerformance",
-                        { metrics: data.data }
-                    );
-                }
-            })
-            .catch(() => {
-                // Silently fail - this is just background optimization
-            });
 
         return () => {
             window.removeEventListener('open-add-book-modal', handleAddBookEvent);

@@ -67,7 +67,7 @@
 >
   <!-- Book Cover (Left side) -->
   <div
-    class="relative w-32 sm:w-40 flex-shrink-0 overflow-hidden bg-gradient-to-br from-base-200 to-base-300"
+    class="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden bg-gradient-to-br from-base-200 to-base-300"
   >
     {#if book.coverImageUrl}
       <img
@@ -261,8 +261,8 @@
   <!-- Book Information (Right side) -->
   <div class="flex-1 p-5 space-y-4 min-w-0 relative" style="flex: 1;">
 
-    <!-- Mobile Action Menu (Always Visible on Mobile) -->
-    <div class="absolute top-3 right-3 lg:hidden">
+    <!-- Action Menu (Mobile + Desktop for books without images) -->
+    <div class="absolute top-3 right-3 {book.coverImageUrl ? 'lg:hidden' : ''}">
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" aria-label="Book actions">
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
