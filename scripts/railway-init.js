@@ -36,15 +36,18 @@ function getDbPath() {
     let dbPath;
     let source;
 
-    // Check for Railway volume path first (highest priority)
-    if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
-        dbPath = `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
-        source = 'RAILWAY_VOLUME_MOUNT_PATH';
-        console.log(`📁 Railway-init using Railway volume path: ${dbPath}`);
-    } else if (process.env.DATABASE_PATH) {
+    // Check for explicit DATABASE_PATH first (highest priority)
+    if (process.env.DATABASE_PATH) {
         dbPath = process.env.DATABASE_PATH;
         source = 'DATABASE_PATH';
         console.log(`📁 Railway-init using DATABASE_PATH: ${dbPath}`);
+    } else if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+        // Handle case where RAILWAY_VOLUME_MOUNT_PATH might be the full file path
+        dbPath = process.env.RAILWAY_VOLUME_MOUNT_PATH.endsWith('.db')
+            ? process.env.RAILWAY_VOLUME_MOUNT_PATH
+            : `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+        source = 'RAILWAY_VOLUME_MOUNT_PATH';
+        console.log(`📁 Railway-init using Railway volume path: ${dbPath}`);
     } else {
         // Default based on environment (fallback)
         const isDev = process.env.NODE_ENV !== 'production';
