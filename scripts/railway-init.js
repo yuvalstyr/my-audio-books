@@ -193,11 +193,14 @@ function createHealthCheck() {
 async function executeIncrementalMigrations(dbPath) {
     console.log('🔧 Executing incremental migrations...');
     console.log(`🔍 Database path: ${dbPath}`);
-    console.log(`🔍 Database path exists: ${require('fs').existsSync(dbPath)}`);
+
+    // Import fs at the top of the try block
+    const { existsSync, statSync } = await import('fs');
+    console.log(`🔍 Database path exists: ${existsSync(dbPath)}`);
 
     // Check file permissions
     try {
-        const stats = require('fs').statSync(dbPath);
+        const stats = statSync(dbPath);
         console.log(`📊 File stats: size=${stats.size}, mode=${stats.mode.toString(8)}, uid=${stats.uid}, gid=${stats.gid}`);
     } catch (err) {
         console.log(`⚠️  Could not get file stats: ${err.message}`);
