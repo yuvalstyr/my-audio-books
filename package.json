@@ -5,7 +5,7 @@
 	"description": "Personal audiobook wishlist management application",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "DATABASE_PATH=./dev.db vite dev",
 		"build": "npm run build:clean && npm run build:app",
 		"build:clean": "rm -rf build",
 		"build:app": "vite build",
