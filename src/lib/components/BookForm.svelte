@@ -176,7 +176,6 @@
                         id: book.id,
                         dateAdded: book.dateAdded,
                         queuePosition: book.queuePosition,
-                        coverImageUrl: book.coverImageUrl,
                     },
                 });
             } else {

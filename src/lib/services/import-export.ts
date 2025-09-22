@@ -274,6 +274,10 @@ export class ImportExportService {
             errors.push('Invalid coverImageUrl');
         }
 
+        if (book.highlyRatedFor && typeof book.highlyRatedFor !== 'string') {
+            errors.push('Invalid highlyRatedFor');
+        }
+
         // Validate tags array
         if (!Array.isArray(book.tags)) {
             errors.push('Missing or invalid tags array');
@@ -313,7 +317,8 @@ export class ImportExportService {
             dateAdded: new Date(book.dateAdded),
             queuePosition: book.queuePosition,
             coverImageUrl: book.coverImageUrl,
-            description: book.description
+            description: book.description,
+            highlyRatedFor: book.highlyRatedFor
         };
 
         return { isValid: true, book: validBook, errors: [] };
