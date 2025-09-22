@@ -31,32 +31,25 @@ function validateEnvironment() {
     }
 }
 
-// Get database path with enhanced logic - MUST match application logic exactly
+// Simple database path logic for Railway
 function getDbPath() {
     let dbPath;
-    let source;
 
-    // Check for explicit DATABASE_PATH first (highest priority)
     if (process.env.DATABASE_PATH) {
+        // Explicit path override
         dbPath = process.env.DATABASE_PATH;
-        source = 'DATABASE_PATH';
-        console.log(`📁 Railway-init using DATABASE_PATH: ${dbPath}`);
+        console.log(`📁 Using explicit DATABASE_PATH: ${dbPath}`);
     } else if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
-        // Handle case where RAILWAY_VOLUME_MOUNT_PATH might be the full file path
-        dbPath = process.env.RAILWAY_VOLUME_MOUNT_PATH.endsWith('.db')
-            ? process.env.RAILWAY_VOLUME_MOUNT_PATH
-            : `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
-        source = 'RAILWAY_VOLUME_MOUNT_PATH';
-        console.log(`📁 Railway-init using Railway volume path: ${dbPath}`);
+        // Railway volume - always put the database file inside the mounted directory
+        dbPath = `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+        console.log(`📁 Using Railway volume: ${dbPath}`);
     } else {
-        // Default based on environment (fallback)
-        const isDev = process.env.NODE_ENV !== 'production';
-        dbPath = isDev ? './dev.db' : './prod.db';
-        source = 'DEFAULT';
-        console.log(`📁 Railway-init using default path: ${dbPath} (NODE_ENV: ${process.env.NODE_ENV || 'undefined'})`);
+        // Local development
+        dbPath = './dev.db';
+        console.log(`📁 Using local development: ${dbPath}`);
     }
 
-    console.log(`🗃️  RAILWAY-INIT DB PATH: ${dbPath} (source: ${source})`);
+    console.log(`🗃️  Final database path: ${dbPath}`);
     return dbPath;
 }
 

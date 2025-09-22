@@ -1,28 +1,20 @@
 import { defineConfig } from 'drizzle-kit';
 
-// Get database path based on environment - must match the unified path logic
+// Simple database path logic - same as railway-init.js
 function getDbPath() {
-    // Check for explicit DATABASE_PATH first (highest priority)
     if (process.env.DATABASE_PATH) {
-        console.log(`🔧 Drizzle using DATABASE_PATH: ${process.env.DATABASE_PATH}`);
+        console.log(`🔧 Drizzle using explicit DATABASE_PATH: ${process.env.DATABASE_PATH}`);
         return process.env.DATABASE_PATH;
     }
 
-    // Check for Railway volume path
     if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
-        // Handle case where RAILWAY_VOLUME_MOUNT_PATH might be the full file path
-        const railwayPath = process.env.RAILWAY_VOLUME_MOUNT_PATH.endsWith('.db')
-            ? process.env.RAILWAY_VOLUME_MOUNT_PATH
-            : `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
-        console.log(`🔧 Drizzle using Railway volume path: ${railwayPath}`);
-        return railwayPath;
+        const path = `${process.env.RAILWAY_VOLUME_MOUNT_PATH}/audiobook-wishlist.db`;
+        console.log(`🔧 Drizzle using Railway volume: ${path}`);
+        return path;
     }
 
-    // Default to dev mode
-    const isDev = process.env.NODE_ENV !== 'production';
-    const defaultPath = isDev ? './dev.db' : './prod.db';
-    console.log(`🔧 Drizzle using default path: ${defaultPath} (NODE_ENV: ${process.env.NODE_ENV || 'undefined'})`);
-    return defaultPath;
+    console.log(`🔧 Drizzle using local development: ./dev.db`);
+    return './dev.db';
 }
 
 export default defineConfig({
