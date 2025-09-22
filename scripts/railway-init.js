@@ -192,13 +192,27 @@ function createHealthCheck() {
 // Safe incremental migration execution
 async function executeIncrementalMigrations(dbPath) {
     console.log('🔧 Executing incremental migrations...');
+    console.log(`🔍 Database path: ${dbPath}`);
+    console.log(`🔍 Database path exists: ${require('fs').existsSync(dbPath)}`);
+
+    // Check file permissions
+    try {
+        const stats = require('fs').statSync(dbPath);
+        console.log(`📊 File stats: size=${stats.size}, mode=${stats.mode.toString(8)}, uid=${stats.uid}, gid=${stats.gid}`);
+    } catch (err) {
+        console.log(`⚠️  Could not get file stats: ${err.message}`);
+    }
 
     try {
         const { readFileSync, readdirSync } = await import('fs');
         const { join } = await import('path');
         const Database = (await import('better-sqlite3')).default;
 
-        const db = new Database(dbPath);
+        const db = new Database(dbPath, {
+            fileMustExist: false,
+            timeout: 5000,
+            verbose: console.log
+        });
 
         // Create migrations tracking table if it doesn't exist
         db.exec(`
