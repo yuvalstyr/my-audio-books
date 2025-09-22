@@ -1,114 +1,29 @@
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from './schema.js';
-import { env } from '$env/dynamic/private';
 import dbPath from './path.js';
 
-// Performance-optimized SQLite configuration
+// Simple SQLite database connection
 const sqlite = new Database(dbPath, {
-    // Enable verbose logging in development
-    verbose: env.NODE_ENV === 'development' ? console.log : undefined,
-    // Optimize for performance
     fileMustExist: false,
-    timeout: 5000,
-    readonly: false
+    timeout: 5000
 });
 
-// Performance optimizations for SQLite
-sqlite.pragma('journal_mode = WAL'); // Write-Ahead Logging for better concurrency
-sqlite.pragma('synchronous = NORMAL'); // Balance between safety and performance
-sqlite.pragma('cache_size = 1000'); // Increase cache size (1000 pages = ~4MB)
-sqlite.pragma('temp_store = MEMORY'); // Store temporary tables in memory
-sqlite.pragma('mmap_size = 268435456'); // Enable memory-mapped I/O (256MB)
-sqlite.pragma('optimize'); // Optimize database on startup
+// Basic SQLite optimizations
+sqlite.pragma('journal_mode = WAL');
+sqlite.pragma('synchronous = NORMAL');
 
-// Connection pool management for better-sqlite3
-class ConnectionManager {
-    private static instance: ConnectionManager;
-    private connectionCount = 0;
-    private maxConnections = 10;
-    private activeQueries = new Set<string>();
+// Simple Drizzle instance
+export const db = drizzle(sqlite, { schema });
 
-    static getInstance(): ConnectionManager {
-        if (!ConnectionManager.instance) {
-            ConnectionManager.instance = new ConnectionManager();
-        }
-        return ConnectionManager.instance;
-    }
-
-    trackQuery(queryId: string): void {
-        this.activeQueries.add(queryId);
-        this.connectionCount++;
-    }
-
-    releaseQuery(queryId: string): void {
-        this.activeQueries.delete(queryId);
-        this.connectionCount = Math.max(0, this.connectionCount - 1);
-    }
-
-    getStats() {
-        return {
-            activeConnections: this.connectionCount,
-            activeQueries: this.activeQueries.size,
-            maxConnections: this.maxConnections
-        };
-    }
-
-    isOverloaded(): boolean {
-        return this.connectionCount >= this.maxConnections;
-    }
-}
-
-export const connectionManager = ConnectionManager.getInstance();
-
-// Create Drizzle instance with schema and performance logging
-export const db = drizzle(sqlite, {
-    schema,
-    logger: env.NODE_ENV === 'development' ? {
-        logQuery: (query: string, params: unknown[]) => {
-            console.log(`[DB Query] ${query}`, params);
-        }
-    } : undefined
-});
-
-// Export the raw sqlite instance for migrations if needed
+// Export the raw sqlite instance for migrations
 export { sqlite };
 
-// Database health monitoring
+// Simple database health check
 export function getDatabaseHealth() {
     try {
-        // First, verify the database exists and is accessible with a simple query
-        const testResult = sqlite.prepare('SELECT 1 as test').get();
-        if (!testResult) {
-            throw new Error('Database test query failed');
-        }
-
-        // Only run PRAGMA statements if basic connectivity works
-        const stats = sqlite.prepare('PRAGMA database_list').all();
-
-        // Try PRAGMA statements with fallbacks
-        let walInfo, cacheInfo;
-        try {
-            walInfo = sqlite.prepare('PRAGMA wal_checkpoint').get();
-        } catch {
-            walInfo = { error: 'WAL checkpoint not available' };
-        }
-
-        try {
-            cacheInfo = sqlite.prepare('PRAGMA cache_size').get();
-        } catch {
-            cacheInfo = { error: 'Cache info not available' };
-        }
-
-        return {
-            isHealthy: true,
-            stats: {
-                databases: stats,
-                walCheckpoint: walInfo,
-                cacheSize: cacheInfo,
-                connections: connectionManager.getStats()
-            }
-        };
+        sqlite.prepare('SELECT 1').get();
+        return { isHealthy: true };
     } catch (error) {
         return {
             isHealthy: false,
@@ -117,17 +32,19 @@ export function getDatabaseHealth() {
     }
 }
 
-// Graceful shutdown handler
+// Simple shutdown handler
 export function closeDatabaseConnection() {
     try {
         sqlite.close();
-        console.log('Database connection closed gracefully');
+        console.log('Database connection closed');
     } catch (error) {
-        console.error('Error closing database connection:', error);
+        console.error('Error closing database:', error);
     }
 }
 
-// Handle process termination
-process.on('SIGINT', closeDatabaseConnection);
-process.on('SIGTERM', closeDatabaseConnection);
-process.on('exit', closeDatabaseConnection);
+// Handle Ctrl+C gracefully
+process.on('SIGINT', () => {
+    console.log('Shutting down...');
+    closeDatabaseConnection();
+    process.exit(0);
+});

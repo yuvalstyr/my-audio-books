@@ -6,7 +6,6 @@ export interface Book {
     id: string;
     title: string;
     author: string;
-    audibleUrl?: string;
     tags: BookTag[];
     narratorRating?: number;
     performanceRating?: number;
@@ -45,7 +44,6 @@ export interface WishlistData {
 export interface CreateBookInput {
     title: string;
     author: string;
-    audibleUrl?: string;
     tags?: BookTag[];
     narratorRating?: number;
     performanceRating?: number;

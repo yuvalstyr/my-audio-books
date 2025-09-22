@@ -1,14 +1,7 @@
 <script lang="ts">
     import type { Book, BookTag, CreateBookInput } from "$lib/types/book";
-    import { generateId, generateTagId } from "$lib/utils/id";
-    import {
-        isValidCreateBookInput,
-        isValidAudibleUrl,
-    } from "$lib/utils/validation";
-    import {
-        parseAudibleUrl,
-        type AudibleMetadata,
-    } from "$lib/services/audible-parser";
+    import { generateTagId } from "$lib/utils/id";
+    import { isValidCreateBookInput } from "$lib/utils/validation";
     import { ErrorLogger } from "$lib/services/error-logger";
     import { NotificationService } from "$lib/services/notification-service";
     import { createEventDispatcher } from "svelte";
@@ -24,7 +17,6 @@
     // Form state
     let title = "";
     let author = "";
-    let audibleUrl = "";
     let coverImageUrl = "";
     let narratorRating: number | undefined = undefined;
     let performanceRating: number | undefined = undefined;
@@ -36,11 +28,6 @@
     let errors: Record<string, string> = {};
     let isSubmitting = false;
     let submitError: string | null = null;
-
-    // Audible parsing state
-    let isParsing = false;
-    let parseMessage = "";
-    let lastParsedUrl = "";
 
     // Predefined tag options based on requirements
     const availableTags: Array<{
@@ -69,7 +56,6 @@
             // Edit mode - populate with existing book data
             title = book.title;
             author = book.author;
-            audibleUrl = book.audibleUrl || "";
             coverImageUrl = book.coverImageUrl || "";
             narratorRating = book.narratorRating;
             performanceRating = book.performanceRating;
@@ -80,7 +66,6 @@
             // Add mode - reset form
             title = "";
             author = "";
-            audibleUrl = "";
             coverImageUrl = "";
             narratorRating = undefined;
             performanceRating = undefined;
@@ -91,9 +76,6 @@
         errors = {};
         isSubmitting = false;
         submitError = null;
-        isParsing = false;
-        parseMessage = "";
-        lastParsedUrl = "";
     }
 
     function validateForm(): boolean {
@@ -106,11 +88,6 @@
 
         if (!author.trim()) {
             errors.author = "Author is required";
-        }
-
-        // Audible URL validation (optional but must be valid if provided)
-        if (audibleUrl.trim() && !isValidAudibleUrl(audibleUrl.trim())) {
-            errors.audibleUrl = "Please enter a valid Audible URL";
         }
 
         // Rating validation
@@ -154,102 +131,6 @@
         return tags;
     }
 
-    /**
-     * Attempts to parse Audible URL and populate form fields
-     */
-    async function handleAudibleUrlParse() {
-        const url = audibleUrl.trim();
-
-        // Don't parse if URL is empty, invalid, or already parsed
-        if (!url || !isValidAudibleUrl(url) || url === lastParsedUrl) {
-            return;
-        }
-
-        isParsing = true;
-        parseMessage = "Parsing Audible URL...";
-
-        try {
-            const result = await parseAudibleUrl(url);
-
-            if (result.success && result.metadata) {
-                const metadata = result.metadata;
-                let fieldsUpdated = [];
-
-                // Only update empty fields to avoid overwriting user input
-                if (metadata.title && !title.trim()) {
-                    title = metadata.title;
-                    fieldsUpdated.push("title");
-                }
-
-                if (metadata.author && !author.trim()) {
-                    author = metadata.author;
-                    fieldsUpdated.push("author");
-                }
-
-                if (metadata.narratorRating && narratorRating === undefined) {
-                    narratorRating = metadata.narratorRating;
-                    fieldsUpdated.push("narrator rating");
-                }
-
-                if (metadata.description && !description.trim()) {
-                    description = metadata.description;
-                    fieldsUpdated.push("description");
-                }
-
-                if (metadata.coverImageUrl && !coverImageUrl.trim()) {
-                    coverImageUrl = metadata.coverImageUrl;
-                    fieldsUpdated.push("cover image");
-                }
-
-                if (fieldsUpdated.length > 0) {
-                    parseMessage = `✓ Extracted: ${fieldsUpdated.join(", ")}`;
-                } else {
-                    parseMessage =
-                        "✓ URL validated - no new information extracted";
-                }
-            } else {
-                parseMessage =
-                    result.error ||
-                    "Unable to extract information. Please enter details manually.";
-            }
-
-            lastParsedUrl = url;
-        } catch (error) {
-            ErrorLogger.error(
-                "Error parsing Audible URL",
-                error instanceof Error ? error : undefined,
-                "BookForm.handleAudibleUrlParse",
-            );
-            parseMessage =
-                "Failed to parse URL. Please enter details manually.";
-        } finally {
-            isParsing = false;
-
-            // Clear the message after a few seconds
-            setTimeout(() => {
-                parseMessage = "";
-            }, 5000);
-        }
-    }
-
-    /**
-     * Handles Audible URL input changes with debounced parsing
-     */
-    let parseTimeout: ReturnType<typeof setTimeout>;
-    function handleAudibleUrlChange() {
-        // Clear any existing timeout
-        if (parseTimeout) {
-            clearTimeout(parseTimeout);
-        }
-
-        // Clear previous parse message
-        parseMessage = "";
-
-        // Debounce the parsing to avoid excessive API calls
-        parseTimeout = setTimeout(() => {
-            handleAudibleUrlParse();
-        }, 1000);
-    }
 
     async function handleSubmit() {
         if (!validateForm()) {
@@ -263,7 +144,6 @@
             const bookData: CreateBookInput = {
                 title: title.trim(),
                 author: author.trim(),
-                audibleUrl: audibleUrl.trim() || undefined,
                 coverImageUrl: coverImageUrl.trim() || undefined,
                 narratorRating:
                     narratorRating !== undefined &&
@@ -488,54 +368,6 @@
                     {/if}
                 </div>
 
-                <!-- Audible URL Field -->
-                <div class="form-control">
-                    <label class="label" for="audibleUrl">
-                        <span class="label-text font-medium">Audible URL</span>
-                        <span class="label-text-alt"
-                            >Optional - Auto-extracts info</span
-                        >
-                    </label>
-                    <div class="relative">
-                        <input
-                            id="audibleUrl"
-                            type="url"
-                            bind:value={audibleUrl}
-                            on:input={handleAudibleUrlChange}
-                            class="input input-bordered w-full {errors.audibleUrl
-                                ? 'input-error'
-                                : ''} {isParsing ? 'pr-10' : ''}"
-                            placeholder="https://www.audible.com/pd/..."
-                            disabled={isSubmitting}
-                        />
-                        {#if isParsing}
-                            <div
-                                class="absolute inset-y-0 right-0 flex items-center pr-3"
-                            >
-                                <span class="loading loading-spinner loading-sm"
-                                ></span>
-                            </div>
-                        {/if}
-                    </div>
-                    {#if parseMessage}
-                        <div class="label">
-                            <span
-                                class="label-text-alt {parseMessage.startsWith(
-                                    '✓',
-                                )
-                                    ? 'text-success'
-                                    : 'text-info'}">{parseMessage}</span
-                            >
-                        </div>
-                    {/if}
-                    {#if errors.audibleUrl}
-                        <div class="label">
-                            <span class="label-text-alt text-error"
-                                >{errors.audibleUrl}</span
-                            >
-                        </div>
-                    {/if}
-                </div>
 
                 <!-- Cover Image URL Field -->
                 <div class="form-control">

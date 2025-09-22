@@ -45,10 +45,6 @@ export function isValidBook(book: any): book is Book {
         return false;
     }
 
-    // Optional fields validation
-    if (book.audibleUrl !== undefined && typeof book.audibleUrl !== 'string') {
-        return false;
-    }
 
     if (book.narratorRating !== undefined &&
         (typeof book.narratorRating !== 'number' || book.narratorRating < 0 || book.narratorRating > 5)) {
@@ -135,11 +131,6 @@ export function isValidCreateBookInput(input: any): input is CreateBookInput {
         return false;
     }
 
-    // Optional fields validation
-    if (input.audibleUrl !== undefined && input.audibleUrl !== null && typeof input.audibleUrl !== 'string') {
-        console.error('Validation failed: audibleUrl invalid', input.audibleUrl);
-        return false;
-    }
 
     if (input.tags !== undefined && input.tags !== null) {
         if (!Array.isArray(input.tags)) {
@@ -205,9 +196,6 @@ export function isValidUpdateBookInput(input: any): boolean {
         }
     }
 
-    if (input.audibleUrl !== undefined && input.audibleUrl !== null && typeof input.audibleUrl !== 'string') {
-        return false;
-    }
 
     if (input.tags !== undefined && input.tags !== null) {
         if (!Array.isArray(input.tags)) {
@@ -284,43 +272,3 @@ export function sanitizeBookForJson(book: Book): any {
     };
 }
 
-/**
- * Validates Audible URL format
- * Uses the dedicated Audible parser service for proper validation
- */
-export function isValidAudibleUrl(url: string): boolean {
-    // Import the Audible parser validation
-    // Note: This creates a circular dependency, so we'll implement basic validation here
-    if (!url || typeof url !== 'string') return false;
-
-    try {
-        const parsedUrl = new URL(url);
-
-        // Check if it's an Audible domain
-        const validDomains = [
-            'audible.com',
-            'www.audible.com',
-            'audible.co.uk',
-            'www.audible.co.uk',
-            'audible.ca',
-            'www.audible.ca',
-            'audible.com.au',
-            'www.audible.com.au',
-            'audible.de',
-            'www.audible.de',
-            'audible.fr',
-            'www.audible.fr'
-        ];
-
-        const isValidDomain = validDomains.some(domain =>
-            parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)
-        );
-
-        if (!isValidDomain) return false;
-
-        // Check if it's a product page (contains /pd/ in the path)
-        return parsedUrl.pathname.includes('/pd/');
-    } catch {
-        return false;
-    }
-}
