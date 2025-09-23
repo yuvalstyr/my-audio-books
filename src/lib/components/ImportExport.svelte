@@ -20,12 +20,12 @@
 		booksSkipped?: number;
 	}
 
-	let importMode: 'replace' | 'merge' | 'skip-duplicates' = 'replace';
+	let importMode = $state<'replace' | 'merge' | 'skip-duplicates'>('replace');
 	let isImporting = $state(false);
 	let isExporting = $state(false);
 	let importResult: ImportResult | null = $state(null);
 	let dragOver = $state(false);
-	let fileInputRef: HTMLInputElement;
+	let fileInputRef = $state<HTMLInputElement>();
 
 	// Export functionality
 	async function handleExport() {
@@ -40,7 +40,6 @@
 					id: book.id,
 					title: book.title,
 					author: book.author,
-					audibleUrl: book.audibleUrl,
 					narratorRating: book.narratorRating,
 					performanceRating: book.performanceRating,
 					description: book.description,
@@ -180,12 +179,12 @@
 					const bookToCreate = {
 						title: bookData.title.trim(),
 						author: bookData.author.trim(),
-						audibleUrl: bookData.audibleUrl?.trim() || undefined,
 						narratorRating: bookData.narratorRating || undefined,
 						performanceRating: bookData.performanceRating || undefined,
 						description: bookData.description?.trim() || undefined,
 						coverImageUrl: bookData.coverImageUrl?.trim() || undefined,
 						queuePosition: bookData.queuePosition || undefined,
+						highlyRatedFor: bookData.highlyRatedFor?.trim() || undefined,
 						tags: bookData.tags?.map((tag: any) => ({
 							id: tag.id || generateId(),
 							name: tag.name,
@@ -283,7 +282,7 @@
 					class="btn btn-primary"
 					class:loading={isExporting}
 					disabled={isExporting}
-					on:click={handleExport}
+					onclick={handleExport}
 				>
 					{#if isExporting}
 						Exporting...
@@ -366,9 +365,9 @@
 					class:bg-primary={dragOver}
 					class:bg-opacity-5={dragOver}
 					class:border-base-300={!dragOver}
-					on:dragover={handleDragOver}
-					on:dragleave={handleDragLeave}
-					on:drop={handleDrop}
+					ondragover={handleDragOver}
+					ondragleave={handleDragLeave}
+					ondrop={handleDrop}
 				>
 					<div class="flex flex-col items-center gap-3">
 						<span class="text-4xl">📄</span>
@@ -376,7 +375,7 @@
 						<p class="text-sm text-base-content/60">Maximum file size: 10MB</p>
 						<button
 							class="btn btn-outline btn-sm"
-							on:click={selectFile}
+							onclick={selectFile}
 							disabled={isImporting}
 						>
 							Select File
@@ -389,7 +388,7 @@
 					accept=".json,application/json"
 					class="hidden"
 					bind:this={fileInputRef}
-					on:change={handleFileSelect}
+					onchange={handleFileSelect}
 				/>
 			</div>
 
@@ -454,7 +453,7 @@
 
 			<!-- Modal Actions -->
 			<div class="modal-action">
-				<button class="btn" on:click={closeModal}>Close</button>
+				<button class="btn" onclick={closeModal}>Close</button>
 			</div>
 		</div>
 	</div>

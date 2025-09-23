@@ -53,7 +53,7 @@ const mockBooks: Book[] = [
         id: '1',
         title: 'Test Book 1',
         author: 'Author 1',
-        audibleUrl: 'https://example.com/1',
+        
         narratorRating: 4,
         performanceRating: 5,
         description: 'A test book',
@@ -71,7 +71,7 @@ const mockBooks: Book[] = [
         id: '2',
         title: 'Test Book 2',
         author: 'Author 2',
-        audibleUrl: 'https://example.com/2',
+        
         narratorRating: 3,
         performanceRating: 4,
         description: 'Another test book',
@@ -539,19 +539,6 @@ describe('Error Handling and Edge Cases Integration Tests', () => {
     });
 
     describe('Browser Compatibility Edge Cases', () => {
-        it('should handle missing localStorage gracefully', () => {
-            // Mock localStorage being unavailable
-            const originalLocalStorage = global.localStorage;
-            delete (global as any).localStorage;
-
-            bookActions.initializeWithData(mockBooks);
-
-            const allBooksAfter = get(allBooks);
-            expect(allBooksAfter).toHaveLength(2);
-
-            // Restore localStorage
-            global.localStorage = originalLocalStorage;
-        });
 
         it('should handle missing fetch API', async () => {
             // Mock fetch being unavailable

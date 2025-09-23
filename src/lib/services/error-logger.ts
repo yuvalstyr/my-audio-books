@@ -71,51 +71,13 @@ export class ErrorLogger {
             error,
             userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
             url: typeof window !== 'undefined' ? window.location.href : 'Unknown',
-            additionalData: additionalData ? this.sanitizeAdditionalData(additionalData) : undefined
+            additionalData
         };
 
         // Log to console for debugging
         this.logToConsole(logEntry);
     }
 
-    /**
-     * Sanitize additional data to remove sensitive information
-     */
-    private static sanitizeAdditionalData(data: any): any {
-        if (!data || typeof data !== 'object') {
-            return data;
-        }
-
-        const sanitized = { ...data };
-
-        // Remove or mask sensitive fields
-        const sensitiveFields = ['token', 'authorization', 'password', 'secret', 'key', 'auth'];
-
-        const sanitizeObject = (obj: any): any => {
-            if (!obj || typeof obj !== 'object') {
-                return obj;
-            }
-
-            if (Array.isArray(obj)) {
-                return obj.map(sanitizeObject);
-            }
-
-            const result: any = {};
-            for (const [key, value] of Object.entries(obj)) {
-                const lowerKey = key.toLowerCase();
-                if (sensitiveFields.some(field => lowerKey.includes(field))) {
-                    result[key] = '[REDACTED]';
-                } else if (typeof value === 'object') {
-                    result[key] = sanitizeObject(value);
-                } else {
-                    result[key] = value;
-                }
-            }
-            return result;
-        };
-
-        return sanitizeObject(sanitized);
-    }
 
     /**
      * Log to browser console with appropriate level

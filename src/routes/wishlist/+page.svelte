@@ -124,7 +124,6 @@
         const result = await bookActions.updateBook(updatedBook.id, {
             title: updatedBook.title,
             author: updatedBook.author,
-            audibleUrl: updatedBook.audibleUrl,
             tags: updatedBook.tags,
             narratorRating: updatedBook.narratorRating,
             performanceRating: updatedBook.performanceRating,

@@ -41,7 +41,7 @@ const mockBooks: Book[] = [
         id: '1',
         title: 'Test Book 1',
         author: 'Test Author 1',
-        audibleUrl: 'https://example.com/1',
+        
         narratorRating: 4,
         performanceRating: 5,
         description: 'Test description 1',
@@ -59,7 +59,7 @@ const mockBooks: Book[] = [
         id: '2',
         title: 'Test Book 2',
         author: 'Test Author 2',
-        audibleUrl: 'https://example.com/2',
+        
         narratorRating: 3,
         performanceRating: 4,
         description: 'Test description 2',
@@ -244,7 +244,7 @@ describe('Book Store', () => {
             const newBookInput = {
                 title: 'New Book',
                 author: 'New Author',
-                audibleUrl: 'https://example.com/new',
+                
                 tags: []
             };
             const apiResponse = { ...mockBooks[0], id: '3', ...newBookInput };
@@ -263,7 +263,7 @@ describe('Book Store', () => {
             const newBookInput = {
                 title: 'New Book',
                 author: 'New Author',
-                audibleUrl: 'https://example.com/new',
+                
                 tags: []
             };
             const error = new Error('Create failed');
@@ -463,7 +463,7 @@ describe('Book Store', () => {
             await bookActions.addBook({
                 title: 'New Book',
                 author: 'New Author',
-                audibleUrl: 'https://example.com/new',
+                
                 tags: []
             });
             expect(get(allBooks)).toHaveLength(3);

@@ -417,16 +417,6 @@
       class="flex justify-between items-center text-xs text-gray-500 dark:text-base-content/50 pt-2 border-t border-gray-200 dark:border-base-300"
     >
       <span>Added {new Date(book.dateAdded).toLocaleDateString()}</span>
-      {#if book.audibleUrl}
-        <a
-          href={book.audibleUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="link link-primary hover:link-accent"
-        >
-          View on Audible
-        </a>
-      {/if}
     </div>
   </div>
 </div>

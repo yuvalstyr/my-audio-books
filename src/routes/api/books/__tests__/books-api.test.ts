@@ -46,7 +46,7 @@ describe('Books API', () => {
             id: testBookId,
             title: 'Test Book',
             author: 'Test Author',
-            audibleUrl: 'https://www.audible.com/pd/test-book/B123456789',
+            
             narratorRating: 4.5,
             performanceRating: 4.0,
             description: 'A test book',
@@ -84,7 +84,7 @@ describe('Books API', () => {
                 id: testBookId,
                 title: 'Test Book',
                 author: 'Test Author',
-                audibleUrl: 'https://www.audible.com/pd/test-book/B123456789',
+                
                 narratorRating: 4.5,
                 performanceRating: 4.0,
                 description: 'A test book',
@@ -118,7 +118,7 @@ describe('Books API', () => {
             const newBook: CreateBookInput = {
                 title: 'New Test Book',
                 author: 'New Test Author',
-                audibleUrl: 'https://www.audible.com/pd/new-test-book/B987654321',
+                
                 narratorRating: 3.5,
                 performanceRating: 4.5,
                 description: 'A new test book',
@@ -140,7 +140,7 @@ describe('Books API', () => {
             expect(data.data).toMatchObject({
                 title: 'New Test Book',
                 author: 'New Test Author',
-                audibleUrl: 'https://www.audible.com/pd/new-test-book/B987654321',
+                
                 narratorRating: 3.5,
                 performanceRating: 4.5,
                 description: 'A new test book',

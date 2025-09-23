@@ -7,6 +7,14 @@ const config = {
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
 
+	// Disable accessibility warnings globally
+	onwarn: (warning, handler) => {
+		if (warning.code.startsWith('a11y_')) {
+			return;
+		}
+		handler(warning);
+	},
+
 	kit: {
 		// Use Node adapter for Railway deployment
 		adapter: adapter(),

@@ -544,7 +544,6 @@ interface Book {
     id: string;
     title: string;
     author: string;
-    audibleUrl?: string;
     narratorRating?: number;
     performanceRating?: number;
     description?: string;

@@ -5,7 +5,6 @@ export const books = sqliteTable('books', {
     id: text('id').primaryKey(),
     title: text('title').notNull(),
     author: text('author').notNull(),
-    audibleUrl: text('audible_url'),
     narratorRating: real('narrator_rating'),
     performanceRating: real('performance_rating'),
     description: text('description'),

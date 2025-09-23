@@ -28,10 +28,18 @@ npm run build:production      # Production build with NODE_ENV=production
 
 # Database Operations
 npm run db:push              # Push schema changes to database (use this after schema changes)
+npm run db:push:dev          # Push schema changes to dev database (./dev.db)
 npm run db:generate          # Generate migrations from schema
 npm run db:migrate           # Run migrations
 npm run db:studio           # Open Drizzle Studio (database GUI)
 npm run db:seed             # Seed database with sample data
+
+# Reset Development Database
+# To start fresh with a clean database:
+rm -f ./dev.db              # Delete the existing dev database file
+npm run db:push:dev         # Create tables from schema in dev database
+npm run db:seed             # (Optional) Add sample data
+# Then restart your dev server if it was running
 
 # Testing
 npm test                    # Run tests in watch mode

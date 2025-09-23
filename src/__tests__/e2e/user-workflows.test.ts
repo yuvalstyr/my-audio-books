@@ -71,7 +71,7 @@ describe('End-to-End User Workflows', () => {
             id: 'book-1',
             title: 'The Hobbit',
             author: 'J.R.R. Tolkien',
-            audibleUrl: 'https://audible.com/pd/hobbit',
+            
             tags: [
                 { id: 'tag-1', name: 'fantasy', color: 'badge-primary' },
                 { id: 'tag-2', name: 'series', color: 'badge-info' }

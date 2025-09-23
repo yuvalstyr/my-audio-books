@@ -49,7 +49,6 @@ export const GET: RequestHandler = async ({ params, request }) => {
                 id: books.id,
                 title: books.title,
                 author: books.author,
-                audibleUrl: books.audibleUrl,
                 narratorRating: books.narratorRating,
                 performanceRating: books.performanceRating,
                 description: books.description,
@@ -85,7 +84,6 @@ export const GET: RequestHandler = async ({ params, request }) => {
             id: bookWithTags[0].id,
             title: bookWithTags[0].title,
             author: bookWithTags[0].author,
-            audibleUrl: bookWithTags[0].audibleUrl,
             narratorRating: bookWithTags[0].narratorRating,
             performanceRating: bookWithTags[0].performanceRating,
             description: bookWithTags[0].description,
@@ -205,7 +203,6 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
         if (input.title !== undefined) updateData.title = input.title.trim();
         if (input.author !== undefined) updateData.author = input.author.trim();
-        if (input.audibleUrl !== undefined) updateData.audibleUrl = input.audibleUrl?.trim() || null;
         if (input.narratorRating !== undefined) updateData.narratorRating = input.narratorRating;
         if (input.performanceRating !== undefined) updateData.performanceRating = input.performanceRating;
         if (input.description !== undefined) updateData.description = input.description?.trim() || null;
@@ -282,7 +279,6 @@ export const PUT: RequestHandler = async ({ params, request }) => {
                 id: books.id,
                 title: books.title,
                 author: books.author,
-                audibleUrl: books.audibleUrl,
                 narratorRating: books.narratorRating,
                 performanceRating: books.performanceRating,
                 description: books.description,
@@ -304,7 +300,6 @@ export const PUT: RequestHandler = async ({ params, request }) => {
             id: updatedBookWithTags[0].id,
             title: updatedBookWithTags[0].title,
             author: updatedBookWithTags[0].author,
-            audibleUrl: updatedBookWithTags[0].audibleUrl,
             narratorRating: updatedBookWithTags[0].narratorRating,
             performanceRating: updatedBookWithTags[0].performanceRating,
             description: updatedBookWithTags[0].description,

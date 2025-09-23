@@ -80,7 +80,7 @@ const mockBooks: Book[] = [
         id: '1',
         title: 'Regular Book',
         author: 'Author 1',
-        audibleUrl: 'https://example.com/1',
+        
         narratorRating: 4,
         performanceRating: 5,
         description: 'A regular book',
@@ -98,7 +98,7 @@ const mockBooks: Book[] = [
         id: '2',
         title: 'Next Book 1',
         author: 'Author 2',
-        audibleUrl: 'https://example.com/2',
+        
         narratorRating: 3,
         performanceRating: 4,
         description: 'A book marked as next',
@@ -117,7 +117,7 @@ const mockBooks: Book[] = [
         id: '3',
         title: 'Next Book 2',
         author: 'Author 3',
-        audibleUrl: 'https://example.com/3',
+        
         narratorRating: 5,
         performanceRating: 5,
         description: 'Another book marked as next',
@@ -351,7 +351,7 @@ describe('Home-Wishlist Navigation Integration Tests', () => {
                 id: '4',
                 title: 'New Next Book',
                 author: 'New Author',
-                audibleUrl: 'https://example.com/4',
+                
                 narratorRating: 4,
                 performanceRating: 4,
                 description: 'A newly added book',
@@ -371,7 +371,7 @@ describe('Home-Wishlist Navigation Integration Tests', () => {
             await bookActions.addBook({
                 title: 'New Next Book',
                 author: 'New Author',
-                audibleUrl: 'https://example.com/4',
+                
                 tags: [{ id: 'tag6', name: 'next', color: 'badge-primary' }]
             });
 

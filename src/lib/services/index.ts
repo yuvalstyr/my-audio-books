@@ -2,9 +2,7 @@
  * Services module exports
  */
 
-export { ConfigManager } from './config-manager';
 export { ImportExportService } from './import-export';
-export { parseAudibleUrl, isValidAudibleUrl } from './audible-parser';
 export {
     ApiClient,
     ApiClientError,
@@ -15,9 +13,7 @@ export {
     isServerError,
     getErrorMessage
 } from './api-client';
-export type { AppConfig } from './config-manager';
 export type { ImportResult, ExportResult } from './import-export';
-export type { AudibleMetadata, ParseResult } from './audible-parser';
 export type {
     ApiResponse,
     ApiError,

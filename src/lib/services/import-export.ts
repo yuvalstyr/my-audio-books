@@ -4,7 +4,7 @@
  */
 
 import type { WishlistData, Book } from '$lib/types/book';
-import { LocalStorageService } from './local-storage';
+import { apiClient } from './api-client';
 import { ErrorLogger } from './error-logger';
 
 export interface ImportResult {
@@ -25,16 +25,13 @@ export class ImportExportService {
      */
     static async exportToJSON(): Promise<ExportResult> {
         try {
-            // Load current data from local storage
-            const loadResult = LocalStorageService.loadData();
-            if (!loadResult.success || !loadResult.data) {
-                return {
-                    success: false,
-                    error: loadResult.error || 'Failed to load current data for export'
-                };
-            }
+            // Load current data from database via API
+            const books = await apiClient.getBooks();
 
-            const data = loadResult.data;
+            const data: WishlistData = {
+                books,
+                lastUpdated: new Date().toISOString()
+            };
 
             // Create formatted JSON string
             const jsonString = JSON.stringify(data, null, 2);
@@ -254,9 +251,6 @@ export class ImportExportService {
         }
 
         // Validate optional fields
-        if (book.audibleUrl && typeof book.audibleUrl !== 'string') {
-            errors.push('Invalid audibleUrl');
-        }
 
         if (book.narratorRating && (typeof book.narratorRating !== 'number' || book.narratorRating < 0 || book.narratorRating > 5)) {
             errors.push('Invalid narratorRating (must be number between 0-5)');
@@ -310,7 +304,6 @@ export class ImportExportService {
             id: book.id,
             title: book.title,
             author: book.author,
-            audibleUrl: book.audibleUrl,
             tags: book.tags,
             narratorRating: book.narratorRating,
             performanceRating: book.performanceRating,
@@ -333,69 +326,103 @@ export class ImportExportService {
     ): Promise<ImportResult> {
         try {
             if (strategy === 'replace') {
-                // Simply replace all data
-                const saveResult = LocalStorageService.saveData(importedData);
-                if (!saveResult.success) {
-                    return {
-                        success: false,
-                        error: saveResult.error || 'Failed to save imported data'
-                    };
+                // Delete all existing books and create new ones
+                const existingBooks = await apiClient.getBooks();
+                for (const book of existingBooks) {
+                    await apiClient.deleteBook(book.id);
+                }
+
+                // Create imported books
+                const createdBooks: Book[] = [];
+                for (const book of importedData.books) {
+                    const created = await apiClient.createBook({
+                        title: book.title,
+                        author: book.author,
+                        tags: book.tags,
+                        narratorRating: book.narratorRating,
+                        performanceRating: book.performanceRating,
+                        queuePosition: book.queuePosition,
+                        coverImageUrl: book.coverImageUrl,
+                        description: book.description,
+                        highlyRatedFor: book.highlyRatedFor
+                    });
+                    createdBooks.push(created);
                 }
 
                 return {
                     success: true,
-                    data: importedData
+                    data: { books: createdBooks, lastUpdated: new Date().toISOString() }
                 };
             }
 
             // For merge strategies, load existing data
-            const existingResult = LocalStorageService.loadData();
-            if (!existingResult.success || !existingResult.data) {
-                return {
-                    success: false,
-                    error: 'Failed to load existing data for merge'
-                };
-            }
-
-            const existingData = existingResult.data;
+            const existingBooks = await apiClient.getBooks();
             const warnings: string[] = [];
-            let mergedBooks: Book[] = [...existingData.books];
+            let mergedBooks: Book[] = [...existingBooks];
 
             if (strategy === 'merge') {
                 // Add all imported books, replacing duplicates by ID
+
+            // Update or create books based on strategy
+            if (strategy === 'merge') {
                 for (const importedBook of importedData.books) {
                     const existingIndex = mergedBooks.findIndex(book => book.id === importedBook.id);
                     if (existingIndex >= 0) {
-                        mergedBooks[existingIndex] = importedBook;
-                        warnings.push(`Updated existing book: ${importedBook.title}`);
+                        // Update existing book
+                        await apiClient.updateBook(importedBook.id, {
+                            id: importedBook.id,
+                            title: importedBook.title,
+                            author: importedBook.author,
+                            tags: importedBook.tags,
+                            narratorRating: importedBook.narratorRating,
+                            performanceRating: importedBook.performanceRating,
+                            queuePosition: importedBook.queuePosition,
+                            coverImageUrl: importedBook.coverImageUrl,
+                            description: importedBook.description,
+                            highlyRatedFor: importedBook.highlyRatedFor
+                        });
                     } else {
-                        mergedBooks.push(importedBook);
+                        // Create new book
+                        await apiClient.createBook({
+                            title: importedBook.title,
+                            author: importedBook.author,
+                            tags: importedBook.tags,
+                            narratorRating: importedBook.narratorRating,
+                            performanceRating: importedBook.performanceRating,
+                            queuePosition: importedBook.queuePosition,
+                            coverImageUrl: importedBook.coverImageUrl,
+                            description: importedBook.description,
+                            highlyRatedFor: importedBook.highlyRatedFor
+                        });
                     }
                 }
             } else if (strategy === 'skip-duplicates') {
-                // Only add books that don't already exist
                 for (const importedBook of importedData.books) {
                     const exists = mergedBooks.some(book => book.id === importedBook.id);
                     if (!exists) {
-                        mergedBooks.push(importedBook);
+                        await apiClient.createBook({
+                            title: importedBook.title,
+                            author: importedBook.author,
+                            tags: importedBook.tags,
+                            narratorRating: importedBook.narratorRating,
+                            performanceRating: importedBook.performanceRating,
+                            queuePosition: importedBook.queuePosition,
+                            coverImageUrl: importedBook.coverImageUrl,
+                            description: importedBook.description,
+                            highlyRatedFor: importedBook.highlyRatedFor
+                        });
                     } else {
                         warnings.push(`Skipped duplicate book: ${importedBook.title}`);
                     }
                 }
             }
 
+            // Get updated book list
+            const finalBooks = await apiClient.getBooks();
             const mergedData: WishlistData = {
-                books: mergedBooks,
+                books: finalBooks,
                 lastUpdated: new Date().toISOString()
             };
-
-            const saveResult = LocalStorageService.saveData(mergedData);
-            if (!saveResult.success) {
-                return {
-                    success: false,
-                    error: saveResult.error || 'Failed to save merged data'
-                };
-            }
 
             return {
                 success: true,
@@ -415,24 +442,29 @@ export class ImportExportService {
     /**
      * Get import/export statistics
      */
-    static getExportStats(): { bookCount: number; dataSize: string; lastUpdated?: string } {
-        const loadResult = LocalStorageService.loadData();
-        if (!loadResult.success || !loadResult.data) {
+    static async getExportStats(): Promise<{ bookCount: number; dataSize: string; lastUpdated?: string }> {
+        try {
+            const books = await apiClient.getBooks();
+            const data: WishlistData = {
+                books,
+                lastUpdated: new Date().toISOString()
+            };
+
+            const jsonString = JSON.stringify(data, null, 2);
+            const sizeInBytes = new Blob([jsonString]).size;
+            const sizeInKB = (sizeInBytes / 1024).toFixed(1);
+
+            return {
+                bookCount: data.books.length,
+                dataSize: `${sizeInKB} KB`,
+                lastUpdated: data.lastUpdated
+            };
+        } catch (error) {
+            ErrorLogger.error('Failed to get export stats', error instanceof Error ? error : undefined, 'ImportExportService.getExportStats');
             return {
                 bookCount: 0,
                 dataSize: '0 KB'
             };
         }
-
-        const data = loadResult.data;
-        const jsonString = JSON.stringify(data, null, 2);
-        const sizeInBytes = new Blob([jsonString]).size;
-        const sizeInKB = (sizeInBytes / 1024).toFixed(1);
-
-        return {
-            bookCount: data.books.length,
-            dataSize: `${sizeInKB} KB`,
-            lastUpdated: data.lastUpdated
-        };
     }
 }

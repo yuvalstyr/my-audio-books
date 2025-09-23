@@ -51,7 +51,7 @@ describe('API Integration Tests', () => {
             const newBook: CreateBookInput = {
                 title: 'Integration Test Book',
                 author: 'Integration Test Author',
-                audibleUrl: 'https://www.audible.com/pd/integration-test/B123456789',
+                
                 narratorRating: 4.0,
                 performanceRating: 4.5,
                 description: 'A book for integration testing',

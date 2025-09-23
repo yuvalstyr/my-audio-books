@@ -63,7 +63,6 @@ export function testBookValidation() {
         id: generateId(),
         title: 'Test Audiobook',
         author: 'Test Author',
-        audibleUrl: 'https://www.audible.com/pd/test-book',
         tags: [funnyTag, nextTag],
         narratorRating: 4.5,
         dateAdded: new Date(),
@@ -94,7 +93,6 @@ export function testCreateBookInputValidation() {
     const validInput: CreateBookInput = {
         title: 'New Book',
         author: 'New Author',
-        audibleUrl: 'https://www.audible.com/pd/new-book',
         narratorRating: 4.0
     };
 

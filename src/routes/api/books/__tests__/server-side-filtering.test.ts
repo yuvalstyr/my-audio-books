@@ -70,7 +70,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1',
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -88,7 +88,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-2',
                 title: 'Book 2',
                 author: 'Author 2',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -106,7 +106,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-3',
                 title: 'Book 3',
                 author: 'Author 3',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -152,7 +152,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1',
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -185,7 +185,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1',
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -219,7 +219,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1',
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -253,7 +253,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1',
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -271,7 +271,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1', // Same book, different tag
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -306,7 +306,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-1',
                 title: 'Book 1',
                 author: 'Author 1',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,
@@ -324,7 +324,7 @@ describe('Books API Server-Side Filtering', () => {
                 id: 'book-2',
                 title: 'Book 2',
                 author: 'Author 2',
-                audibleUrl: null,
+                
                 narratorRating: null,
                 performanceRating: null,
                 description: null,

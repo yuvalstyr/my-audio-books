@@ -8,7 +8,7 @@ describe('BookCard Component', () => {
             id: 'test-book-1',
             title: 'Test Audiobook Title',
             author: 'Test Author',
-            audibleUrl: 'https://audible.com/test',
+            
             tags: [
                 { id: 'tag-1', name: 'funny', color: '#fbbf24' },
                 { id: 'tag-2', name: 'series', color: '#3b82f6' }
@@ -35,7 +35,6 @@ describe('BookCard Component', () => {
         };
 
         expect(minimalBook.narratorRating).toBeUndefined();
-        expect(minimalBook.audibleUrl).toBeUndefined();
         expect(minimalBook.queuePosition).toBeUndefined();
     });
 });

@@ -20,17 +20,6 @@ vi.mock('$lib/utils/id', () => ({
 }));
 
 // Mock the services
-vi.mock('$lib/services/audible-parser', () => ({
-    parseAudibleUrl: vi.fn(() => Promise.resolve({
-        success: true,
-        metadata: {
-            title: 'Parsed Title',
-            author: 'Parsed Author',
-            description: 'Parsed description'
-        }
-    }))
-}));
-
 vi.mock('$lib/services/error-logger', () => ({
     ErrorLogger: {
         error: vi.fn()
@@ -146,7 +135,7 @@ describe('BookForm Component', () => {
             id: 'book-123',
             title: 'Existing Book',
             author: 'Existing Author',
-            audibleUrl: 'https://audible.com/pd/test',
+            
             tags: [
                 { id: 'tag-1', name: 'funny', color: 'badge-warning' }
             ],
@@ -183,34 +172,6 @@ describe('BookForm Component', () => {
 
             const funnyTag = screen.getByText('Funny');
             expect(funnyTag.closest('.badge')).toHaveClass('badge-warning');
-        });
-    });
-
-    describe('Audible URL Parsing', () => {
-        it('should parse Audible URL and populate fields', async () => {
-            const { parseAudibleUrl } = await import('$lib/services/audible-parser');
-
-            component = render(BookForm, {
-                props: {
-                    book: null,
-                    isOpen: true
-                }
-            });
-
-            const urlInput = screen.getByLabelText(/audible url/i);
-            await fireEvent.input(urlInput, {
-                target: { value: 'https://audible.com/pd/test-book' }
-            });
-
-            // Wait for debounced parsing
-            await waitFor(() => {
-                expect(parseAudibleUrl).toHaveBeenCalledWith('https://audible.com/pd/test-book');
-            }, { timeout: 2000 });
-
-            await waitFor(() => {
-                expect(screen.getByDisplayValue('Parsed Title')).toBeInTheDocument();
-                expect(screen.getByDisplayValue('Parsed Author')).toBeInTheDocument();
-            });
         });
     });
 

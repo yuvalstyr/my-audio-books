@@ -113,7 +113,6 @@ export const bookActions = {
             id: tempId,
             title: bookInput.title,
             author: bookInput.author,
-            audibleUrl: bookInput.audibleUrl,
             narratorRating: bookInput.narratorRating,
             performanceRating: bookInput.performanceRating,
             description: bookInput.description,

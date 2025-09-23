@@ -89,7 +89,7 @@ describe('API Edge Cases and Error Handling', () => {
                 title: 'Valid Title',
                 author: 'Valid Author',
                 description: null,
-                audibleUrl: undefined,
+                
                 narratorRating: null,
                 performanceRating: undefined
             };
@@ -330,7 +330,6 @@ describe('API Edge Cases and Error Handling', () => {
                 const book = {
                     title: 'URL Test Book',
                     author: 'URL Test Author',
-                    audibleUrl: test.url
                 };
 
                 const request = createMockRequest(book, 'http://localhost:3000/api/books', 'POST');

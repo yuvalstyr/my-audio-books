@@ -11,7 +11,7 @@ const mockBook: Book = {
     id: 'test-book-1',
     title: 'Test Audiobook Title',
     author: 'Test Author',
-    audibleUrl: 'https://audible.com/test',
+    
     tags: [
         { id: 'tag-1', name: 'next', color: 'badge-primary' },
         { id: 'tag-2', name: 'sci-fi', color: 'badge-secondary' },

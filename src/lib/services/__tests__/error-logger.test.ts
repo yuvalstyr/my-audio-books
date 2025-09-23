@@ -5,18 +5,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ErrorLogger } from '../error-logger';
 
-// Mock localStorage
-const localStorageMock = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-};
-
-Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock
-});
-
 // Mock console methods
 const consoleMock = {
     error: vi.fn(),
@@ -33,127 +21,129 @@ Object.defineProperty(console, 'debug', { value: consoleMock.debug });
 describe('ErrorLogger', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorageMock.getItem.mockReturnValue(null);
     });
 
     describe('logging methods', () => {
         it('should log error messages', () => {
-            const testError = new Error('Test error');
-            ErrorLogger.error('Test message', testError, 'TestContext');
+            ErrorLogger.error('Test error message');
 
             expect(consoleMock.error).toHaveBeenCalled();
-            expect(localStorageMock.setItem).toHaveBeenCalled();
+            const args = consoleMock.error.mock.calls[0];
+            expect(args[0]).toContain('[ERROR]');
+            expect(args[0]).toContain('Test error message');
         });
 
         it('should log warning messages', () => {
-            ErrorLogger.warn('Test warning', 'TestContext');
+            ErrorLogger.warn('Test warning message');
 
             expect(consoleMock.warn).toHaveBeenCalled();
-            expect(localStorageMock.setItem).toHaveBeenCalled();
+            const args = consoleMock.warn.mock.calls[0];
+            expect(args[0]).toContain('[WARN]');
+            expect(args[0]).toContain('Test warning message');
         });
 
         it('should log info messages', () => {
-            ErrorLogger.info('Test info', 'TestContext');
+            ErrorLogger.info('Test info message');
 
             expect(consoleMock.info).toHaveBeenCalled();
-            expect(localStorageMock.setItem).toHaveBeenCalled();
+            const args = consoleMock.info.mock.calls[0];
+            expect(args[0]).toContain('[INFO]');
+            expect(args[0]).toContain('Test info message');
         });
 
-        it('should only log debug messages in development', () => {
-            // Mock development environment
-            vi.stubEnv('DEV', true);
-
-            ErrorLogger.debug('Test debug', 'TestContext');
+        it('should log debug messages in development', () => {
+            // Note: debug only logs in development mode
+            ErrorLogger.debug('Test debug message');
 
             expect(consoleMock.debug).toHaveBeenCalled();
-            expect(localStorageMock.setItem).toHaveBeenCalled();
+            const args = consoleMock.debug.mock.calls[0];
+            expect(args[0]).toContain('[DEBUG]');
+            expect(args[0]).toContain('Test debug message');
+        });
+
+        it('should include context in log messages', () => {
+            ErrorLogger.error('Test error', undefined, 'TestContext');
+
+            expect(consoleMock.error).toHaveBeenCalled();
+            const args = consoleMock.error.mock.calls[0];
+            expect(args[0]).toContain('(TestContext)');
+        });
+
+        it('should include error objects', () => {
+            const testError = new Error('Test error object');
+            ErrorLogger.error('Test message', testError);
+
+            expect(consoleMock.error).toHaveBeenCalled();
+            const args = consoleMock.error.mock.calls;
+            expect(args[0]).toHaveLength(2); // message and error string
+            expect(args[0][1]).toContain('Test error object');
+        });
+
+        it('should include additional data', () => {
+            const additionalData = { key: 'value', number: 42 };
+            ErrorLogger.error('Test message', undefined, undefined, additionalData);
+
+            expect(consoleMock.error).toHaveBeenCalled();
+            const args = consoleMock.error.mock.calls[0];
+            expect(args).toContain('Additional Data:');
+            expect(args).toContain(additionalData);
         });
     });
 
     describe('getUserFriendlyError', () => {
         it('should return user-friendly error for network errors', () => {
-            const error = new Error('fetch failed');
-            const userError = ErrorLogger.getUserFriendlyError(error);
+            const result = ErrorLogger.getUserFriendlyError('Failed to fetch data');
 
-            expect(userError.title).toBe('Connection Problem');
-            expect(userError.type).toBe('error');
+            expect(result.title).toBe('Connection Problem');
+            expect(result.type).toBe('error');
         });
 
-        it('should return generic error for API-related errors', () => {
-            const error = new Error('API error');
-            const userError = ErrorLogger.getUserFriendlyError(error);
+        it('should return user-friendly error for validation errors', () => {
+            const result = ErrorLogger.getUserFriendlyError('Validation failed for input');
 
-            expect(userError.title).toBe('Something Went Wrong');
-            expect(userError.type).toBe('error');
+            expect(result.title).toBe('Invalid Data');
+            expect(result.type).toBe('error');
         });
 
-        it('should return generic error for unknown errors', () => {
-            const error = new Error('Unknown error');
-            const userError = ErrorLogger.getUserFriendlyError(error);
+        it('should return user-friendly error for quota errors', () => {
+            const result = ErrorLogger.getUserFriendlyError('Quota exceeded');
 
-            expect(userError.title).toBe('Something Went Wrong');
-            expect(userError.type).toBe('error');
-        });
-    });
-
-    describe('log management', () => {
-        it('should retrieve stored logs', () => {
-            const mockLogs = JSON.stringify([
-                {
-                    id: 'test-1',
-                    timestamp: new Date().toISOString(),
-                    level: 'error',
-                    message: 'Test error',
-                    context: 'TestContext'
-                }
-            ]);
-
-            localStorageMock.getItem.mockReturnValue(mockLogs);
-
-            const logs = ErrorLogger.getLogs();
-            expect(logs).toHaveLength(1);
-            expect(logs[0].message).toBe('Test error');
+            expect(result.title).toBe('Storage Full');
+            expect(result.type).toBe('warning');
         });
 
-        it('should clear all logs', () => {
-            ErrorLogger.clearLogs();
-            expect(localStorageMock.removeItem).toHaveBeenCalledWith('audiobook-error-logs');
+        it('should return default error for unknown errors', () => {
+            const result = ErrorLogger.getUserFriendlyError('Some random error');
+
+            expect(result.title).toBe('Something Went Wrong');
+            expect(result.type).toBe('error');
         });
 
-        it('should get error statistics', () => {
-            const mockLogs = JSON.stringify([
-                {
-                    id: 'test-1',
-                    timestamp: new Date().toISOString(),
-                    level: 'error',
-                    message: 'Test error'
-                },
-                {
-                    id: 'test-2',
-                    timestamp: new Date().toISOString(),
-                    level: 'warn',
-                    message: 'Test warning'
-                }
-            ]);
+        it('should handle Error objects', () => {
+            const error = new TypeError('Type error occurred');
+            const result = ErrorLogger.getUserFriendlyError(error);
 
-            localStorageMock.getItem.mockReturnValue(mockLogs);
-
-            const stats = ErrorLogger.getErrorStats();
-            expect(stats.total).toBe(2);
-            expect(stats.byLevel.error).toBe(1);
-            expect(stats.byLevel.warn).toBe(1);
+            expect(result.title).toBe('Unexpected Error');
+            expect(result.type).toBe('error');
         });
     });
 
     describe('logAndGetUserError', () => {
-        it('should log error and return user-friendly version', () => {
-            const error = new Error('Test error');
-            const userError = ErrorLogger.logAndGetUserError(error, 'TestContext');
+        it('should log technical error and return user-friendly version', () => {
+            const result = ErrorLogger.logAndGetUserError('Failed to fetch', 'API');
 
             expect(consoleMock.error).toHaveBeenCalled();
-            expect(localStorageMock.setItem).toHaveBeenCalled();
-            expect(userError.title).toBeDefined();
-            expect(userError.message).toBeDefined();
+            expect(result.title).toBe('Connection Problem');
+            expect(result.type).toBe('error');
+        });
+
+        it('should handle Error objects', () => {
+            const error = new Error('Technical error');
+            const result = ErrorLogger.logAndGetUserError(error, 'Component');
+
+            expect(consoleMock.error).toHaveBeenCalled();
+            expect(result.title).toBe('Something Went Wrong');
         });
     });
+
 });

@@ -173,6 +173,11 @@ export function isValidCreateBookInput(input: any): input is CreateBookInput {
         return false;
     }
 
+    if (input.highlyRatedFor !== undefined && input.highlyRatedFor !== null && typeof input.highlyRatedFor !== 'string') {
+        console.error('Validation failed: highlyRatedFor invalid', input.highlyRatedFor);
+        return false;
+    }
+
     console.log('Validation passed for CreateBookInput:', input);
     return true;
 }
@@ -227,6 +232,10 @@ export function isValidUpdateBookInput(input: any): boolean {
     }
 
     if (input.description !== undefined && input.description !== null && typeof input.description !== 'string') {
+        return false;
+    }
+
+    if (input.highlyRatedFor !== undefined && input.highlyRatedFor !== null && typeof input.highlyRatedFor !== 'string') {
         return false;
     }
 

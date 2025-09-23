@@ -15,7 +15,7 @@ describe('BookList Component', () => {
         author,
         tags: [createMockTag('funny')],
         dateAdded: new Date('2025-01-01'),
-        audibleUrl: `https://audible.com/${id}`,
+        
         narratorRating: 4.5
     });
 
