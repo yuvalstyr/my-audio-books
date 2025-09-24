@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { apiClient, type ApiBook } from '$lib/services/api-client';
+	import { apiClient } from '$lib/services/api-client';
 	import { generateId } from '$lib/utils/id';
 	import type { Book, BookTag } from '$lib/types/book';
 
@@ -183,6 +183,7 @@
 						performanceRating: bookData.performanceRating || undefined,
 						description: bookData.description?.trim() || undefined,
 						coverImageUrl: bookData.coverImageUrl?.trim() || undefined,
+						audibleUrl: bookData.audibleUrl?.trim() || undefined,
 						queuePosition: bookData.queuePosition || undefined,
 						highlyRatedFor: bookData.highlyRatedFor?.trim() || undefined,
 						tags: bookData.tags?.map((tag: any) => ({

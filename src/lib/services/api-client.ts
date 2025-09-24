@@ -72,6 +72,9 @@ export class ApiClient {
     }
 
     async updateBook(id: string, updates: Partial<UpdateBookInput>): Promise<Book> {
+        console.log('🔄 ApiClient.updateBook - Making PUT request to:', `/books/${id}`);
+        console.log('🔄 ApiClient.updateBook - Updates payload:', updates);
+        console.log('🔄 ApiClient.updateBook - Book ID:', id);
         return this.request<Book>(`/books/${id}`, {
             method: 'PUT',
             body: JSON.stringify(updates)

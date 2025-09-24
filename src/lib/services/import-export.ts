@@ -6,6 +6,7 @@
 import type { WishlistData, Book } from '$lib/types/book';
 import { apiClient } from './api-client';
 import { ErrorLogger } from './error-logger';
+import { generateId } from '$lib/utils/id';
 
 export interface ImportResult {
     success: boolean;
@@ -238,8 +239,9 @@ export class ImportExportService {
             return { isValid: false, errors: ['Book must be an object'] };
         }
 
-        if (!book.id || typeof book.id !== 'string') {
-            errors.push('Missing or invalid id');
+        // ID is optional during import - we'll generate one if needed
+        if (book.id !== undefined && book.id !== null && book.id !== '' && typeof book.id !== 'string') {
+            errors.push('Invalid id type');
         }
 
         if (!book.title || typeof book.title !== 'string') {
@@ -276,9 +278,12 @@ export class ImportExportService {
             errors.push('Invalid highlyRatedFor');
         }
 
-        // Validate tags array
-        if (!Array.isArray(book.tags)) {
-            errors.push('Missing or invalid tags array');
+        // Validate tags array - it's optional, but if present must be an array
+        if (book.tags === undefined || book.tags === null) {
+            // Tags are optional, set to empty array
+            book.tags = [];
+        } else if (!Array.isArray(book.tags)) {
+            errors.push('Tags must be an array if provided');
         } else {
             for (let i = 0; i < book.tags.length; i++) {
                 const tag = book.tags[i];
@@ -303,9 +308,9 @@ export class ImportExportService {
             return { isValid: false, errors };
         }
 
-        // Create valid book object
+        // Create valid book object - generate ID if missing
         const validBook: Book = {
-            id: book.id,
+            id: book.id && book.id.trim() !== '' ? book.id : generateId(),
             title: book.title,
             author: book.author,
             tags: book.tags,
@@ -366,17 +371,26 @@ export class ImportExportService {
             const warnings: string[] = [];
             let mergedBooks: Book[] = [...existingBooks];
 
-            if (strategy === 'merge') {
-                // Add all imported books, replacing duplicates by ID
-
             // Update or create books based on strategy
             if (strategy === 'merge') {
                 for (const importedBook of importedData.books) {
-                    const existingIndex = mergedBooks.findIndex(book => book.id === importedBook.id);
-                    if (existingIndex >= 0) {
-                        // Update existing book
-                        await apiClient.updateBook(importedBook.id, {
-                            id: importedBook.id,
+                    // Find existing book by ID, or by title+author if ID is empty/missing
+                    let existingBook = null;
+                    if (importedBook.id && importedBook.id.trim() !== '') {
+                        existingBook = mergedBooks.find(book => book.id === importedBook.id);
+                    }
+
+                    // If not found by ID, try to match by title and author
+                    if (!existingBook) {
+                        existingBook = mergedBooks.find(book =>
+                            book.title.toLowerCase() === importedBook.title.toLowerCase() &&
+                            book.author.toLowerCase() === importedBook.author.toLowerCase()
+                        );
+                    }
+
+                    if (existingBook) {
+                        // Update existing book using the existing book's ID
+                        await apiClient.updateBook(existingBook.id, {
                             title: importedBook.title,
                             author: importedBook.author,
                             tags: importedBook.tags,
@@ -406,7 +420,20 @@ export class ImportExportService {
                 }
             } else if (strategy === 'skip-duplicates') {
                 for (const importedBook of importedData.books) {
-                    const exists = mergedBooks.some(book => book.id === importedBook.id);
+                    // Check for existing book by ID or title+author
+                    let exists = false;
+                    if (importedBook.id && importedBook.id.trim() !== '') {
+                        exists = mergedBooks.some(book => book.id === importedBook.id);
+                    }
+
+                    // If not found by ID, check by title and author
+                    if (!exists) {
+                        exists = mergedBooks.some(book =>
+                            book.title.toLowerCase() === importedBook.title.toLowerCase() &&
+                            book.author.toLowerCase() === importedBook.author.toLowerCase()
+                        );
+                    }
+
                     if (!exists) {
                         await apiClient.createBook({
                             title: importedBook.title,

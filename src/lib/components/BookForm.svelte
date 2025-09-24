@@ -140,6 +140,7 @@
             return;
         }
 
+        console.log("📝 BookForm: Setting isSubmitting to true");
         isSubmitting = true;
 
         try {
@@ -193,8 +194,6 @@
                 // Add mode - dispatch CreateBookInput
                 dispatch("save", { book: bookData });
             }
-
-            handleCancel(); // Close modal after successful save
         } catch (error) {
             let errorMessage = "Failed to save book. Please try again.";
 
@@ -224,11 +223,13 @@
             submitError = errorMessage;
             NotificationService.error("Save Failed", errorMessage);
         } finally {
+            console.log("📝 BookForm: Setting isSubmitting to false");
             isSubmitting = false;
         }
     }
 
     function handleCancel() {
+        console.log("📝 BookForm.handleCancel called, isSubmitting:", isSubmitting, "isOpen:", isOpen);
         dispatch("cancel");
     }
 
@@ -568,8 +569,9 @@
                         class="btn btn-ghost"
                         on:click={handleCancel}
                         disabled={isSubmitting}
+                        title="Cancel button - isSubmitting: {isSubmitting}"
                     >
-                        Cancel
+                        Cancel {isSubmitting ? '(submitting...)' : ''}
                     </button>
                     <button
                         type="submit"

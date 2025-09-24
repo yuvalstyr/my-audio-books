@@ -166,10 +166,14 @@ export const bookActions = {
      * Update a book with optimistic updates
      */
     async updateBook(bookId: string, updates: any): Promise<Book | null> {
+        console.log('📚 BookStore.updateBook - Updating book ID:', bookId);
+        console.log('📚 BookStore.updateBook - Updates:', updates);
+
         const currentState = get(bookStore);
         const originalBook = currentState.books.find(book => book.id === bookId);
 
         if (!originalBook) {
+            console.error('📚 BookStore.updateBook - Book not found:', bookId);
             ErrorLogger.error(`Book not found: ${bookId}`, undefined, 'BookStore.updateBook');
             return null;
         }

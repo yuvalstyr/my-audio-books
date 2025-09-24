@@ -100,7 +100,6 @@
         event: CustomEvent<{ book: CreateBookInput }>,
     ) {
         const bookInput = event.detail.book;
-        showBookForm = false;
 
         const result = await bookActions.addBook({
             ...bookInput,
@@ -108,6 +107,8 @@
         });
 
         if (result) {
+            showBookForm = false;
+            editingBook = null;
             ErrorLogger.info(
                 `Added book: ${result.title}`,
                 "WishlistPage.handleAddBook",
@@ -121,26 +122,38 @@
     async function handleUpdateBook(event: CustomEvent<{ book: Book }>) {
         const updatedBook = event.detail.book;
 
-        const result = await bookActions.updateBook(updatedBook.id, {
-            title: updatedBook.title,
-            author: updatedBook.author,
-            tags: updatedBook.tags,
-            narratorRating: updatedBook.narratorRating,
-            performanceRating: updatedBook.performanceRating,
-            description: updatedBook.description,
-            coverImageUrl: updatedBook.coverImageUrl,
-            highlyRatedFor: updatedBook.highlyRatedFor,
-        });
+        console.log('📝 WishlistPage.handleUpdateBook - Book being updated:', updatedBook);
+        console.log('📝 WishlistPage.handleUpdateBook - Book ID:', updatedBook.id);
+        console.log('📝 WishlistPage.handleUpdateBook - Book ID type:', typeof updatedBook.id);
 
-        if (result) {
-            showBookForm = false;
-            editingBook = null;
+        try {
+            const result = await bookActions.updateBook(updatedBook.id, {
+                title: updatedBook.title,
+                author: updatedBook.author,
+                tags: updatedBook.tags,
+                narratorRating: updatedBook.narratorRating,
+                performanceRating: updatedBook.performanceRating,
+                description: updatedBook.description,
+                coverImageUrl: updatedBook.coverImageUrl,
+                audibleUrl: updatedBook.audibleUrl,
+                highlyRatedFor: updatedBook.highlyRatedFor,
+            });
 
-            ErrorLogger.info(
-                `Updated book: ${result.title}`,
-                "WishlistPage.handleUpdateBook",
-            );
-            NotificationService.operationFeedback("update", true, result.title);
+            if (result) {
+                console.log('📝 Update successful, closing modal');
+                showBookForm = false;
+                editingBook = null;
+
+                ErrorLogger.info(
+                    `Updated book: ${result.title}`,
+                    "WishlistPage.handleUpdateBook",
+                );
+                NotificationService.operationFeedback("update", true, result.title);
+            } else {
+                console.log('📝 Update failed, keeping modal open');
+            }
+        } catch (error) {
+            console.log('📝 Update threw error, keeping modal open:', error);
         }
     }
 
@@ -244,6 +257,7 @@
      * Close book form modal
      */
     function handleBookFormCancel() {
+        console.log("📝 WishlistPage.handleBookFormCancel called");
         showBookForm = false;
         editingBook = null;
     }
