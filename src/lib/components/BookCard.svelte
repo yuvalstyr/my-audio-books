@@ -412,6 +412,23 @@
       </div>
     {/if}
 
+    <!-- Audible Link -->
+    {#if book.audibleUrl}
+      <div class="pt-2">
+        <a
+          href={book.audibleUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 text-sm text-primary hover:text-primary-focus transition-colors font-medium"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          View on Audible
+        </a>
+      </div>
+    {/if}
+
     <!-- Meta Information -->
     <div
       class="flex justify-between items-center text-xs text-gray-500 dark:text-base-content/50 pt-2 border-t border-gray-200 dark:border-base-300"

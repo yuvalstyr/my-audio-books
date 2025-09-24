@@ -12,6 +12,7 @@ export interface Book {
     dateAdded: Date;
     queuePosition?: number;
     coverImageUrl?: string;
+    audibleUrl?: string;
     description?: string;
     highlyRatedFor?: string;
 }
@@ -49,6 +50,7 @@ export interface CreateBookInput {
     performanceRating?: number;
     queuePosition?: number;
     coverImageUrl?: string;
+    audibleUrl?: string;
     description?: string;
     highlyRatedFor?: string;
 }

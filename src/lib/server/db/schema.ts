@@ -9,6 +9,7 @@ export const books = sqliteTable('books', {
     performanceRating: real('performance_rating'),
     description: text('description'),
     coverImageUrl: text('cover_image_url'),
+    audibleUrl: text('audible_url'),
     queuePosition: integer('queue_position'),
     dateAdded: text('date_added').notNull(),
     highlyRatedFor: text('highly_rated_for'),

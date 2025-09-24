@@ -18,6 +18,7 @@
     let title = "";
     let author = "";
     let coverImageUrl = "";
+    let audibleUrl = "";
     let narratorRating: number | undefined = undefined;
     let performanceRating: number | undefined = undefined;
     let description = "";
@@ -57,6 +58,7 @@
             title = book.title;
             author = book.author;
             coverImageUrl = book.coverImageUrl || "";
+            audibleUrl = book.audibleUrl || "";
             narratorRating = book.narratorRating;
             performanceRating = book.performanceRating;
             description = book.description || "";
@@ -67,6 +69,7 @@
             title = "";
             author = "";
             coverImageUrl = "";
+            audibleUrl = "";
             narratorRating = undefined;
             performanceRating = undefined;
             description = "";
@@ -145,6 +148,7 @@
                 title: title.trim(),
                 author: author.trim(),
                 coverImageUrl: coverImageUrl.trim() || undefined,
+                audibleUrl: audibleUrl.trim() || undefined,
                 narratorRating:
                     narratorRating !== undefined &&
                     narratorRating !== null &&
@@ -395,6 +399,29 @@
                         <span class="label-text-alt text-info">
                             Tip: Right-click on book covers and "Copy image
                             address"
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Audible URL Field -->
+                <div class="form-control">
+                    <label class="label" for="audibleUrl">
+                        <span class="label-text font-medium"
+                            >Audible URL</span
+                        >
+                        <span class="label-text-alt">Optional</span>
+                    </label>
+                    <input
+                        id="audibleUrl"
+                        type="url"
+                        bind:value={audibleUrl}
+                        class="input input-bordered w-full"
+                        placeholder="https://www.audible.com/pd/..."
+                        disabled={isSubmitting}
+                    />
+                    <div class="label">
+                        <span class="label-text-alt text-info">
+                            Link to the book's Audible page
                         </span>
                     </div>
                 </div>

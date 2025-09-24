@@ -60,6 +60,10 @@ export function isValidBook(book: any): book is Book {
         return false;
     }
 
+    if (book.audibleUrl !== undefined && typeof book.audibleUrl !== 'string') {
+        return false;
+    }
+
     if (book.description !== undefined && typeof book.description !== 'string') {
         return false;
     }
@@ -168,6 +172,11 @@ export function isValidCreateBookInput(input: any): input is CreateBookInput {
         return false;
     }
 
+    if (input.audibleUrl !== undefined && input.audibleUrl !== null && typeof input.audibleUrl !== 'string') {
+        console.error('Validation failed: audibleUrl invalid', input.audibleUrl);
+        return false;
+    }
+
     if (input.description !== undefined && input.description !== null && typeof input.description !== 'string') {
         console.error('Validation failed: description invalid', input.description);
         return false;
@@ -228,6 +237,10 @@ export function isValidUpdateBookInput(input: any): boolean {
     }
 
     if (input.coverImageUrl !== undefined && input.coverImageUrl !== null && typeof input.coverImageUrl !== 'string') {
+        return false;
+    }
+
+    if (input.audibleUrl !== undefined && input.audibleUrl !== null && typeof input.audibleUrl !== 'string') {
         return false;
     }
 

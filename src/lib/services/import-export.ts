@@ -268,6 +268,10 @@ export class ImportExportService {
             errors.push('Invalid coverImageUrl');
         }
 
+        if (book.audibleUrl && typeof book.audibleUrl !== 'string') {
+            errors.push('Invalid audibleUrl');
+        }
+
         if (book.highlyRatedFor && typeof book.highlyRatedFor !== 'string') {
             errors.push('Invalid highlyRatedFor');
         }
@@ -310,6 +314,7 @@ export class ImportExportService {
             dateAdded: new Date(book.dateAdded),
             queuePosition: book.queuePosition,
             coverImageUrl: book.coverImageUrl,
+            audibleUrl: book.audibleUrl,
             description: book.description,
             highlyRatedFor: book.highlyRatedFor
         };
@@ -343,6 +348,7 @@ export class ImportExportService {
                         performanceRating: book.performanceRating,
                         queuePosition: book.queuePosition,
                         coverImageUrl: book.coverImageUrl,
+                        audibleUrl: book.audibleUrl,
                         description: book.description,
                         highlyRatedFor: book.highlyRatedFor
                     });
@@ -378,6 +384,7 @@ export class ImportExportService {
                             performanceRating: importedBook.performanceRating,
                             queuePosition: importedBook.queuePosition,
                             coverImageUrl: importedBook.coverImageUrl,
+                            audibleUrl: importedBook.audibleUrl,
                             description: importedBook.description,
                             highlyRatedFor: importedBook.highlyRatedFor
                         });
@@ -391,6 +398,7 @@ export class ImportExportService {
                             performanceRating: importedBook.performanceRating,
                             queuePosition: importedBook.queuePosition,
                             coverImageUrl: importedBook.coverImageUrl,
+                            audibleUrl: importedBook.audibleUrl,
                             description: importedBook.description,
                             highlyRatedFor: importedBook.highlyRatedFor
                         });
@@ -408,6 +416,7 @@ export class ImportExportService {
                             performanceRating: importedBook.performanceRating,
                             queuePosition: importedBook.queuePosition,
                             coverImageUrl: importedBook.coverImageUrl,
+                            audibleUrl: importedBook.audibleUrl,
                             description: importedBook.description,
                             highlyRatedFor: importedBook.highlyRatedFor
                         });

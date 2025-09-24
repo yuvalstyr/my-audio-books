@@ -53,6 +53,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
                 performanceRating: books.performanceRating,
                 description: books.description,
                 coverImageUrl: books.coverImageUrl,
+                audibleUrl: books.audibleUrl,
                 queuePosition: books.queuePosition,
                 dateAdded: books.dateAdded,
                 highlyRatedFor: books.highlyRatedFor,
@@ -88,6 +89,7 @@ export const GET: RequestHandler = async ({ params, request }) => {
             performanceRating: bookWithTags[0].performanceRating,
             description: bookWithTags[0].description,
             coverImageUrl: bookWithTags[0].coverImageUrl,
+            audibleUrl: bookWithTags[0].audibleUrl,
             queuePosition: bookWithTags[0].queuePosition,
             dateAdded: new Date(bookWithTags[0].dateAdded),
             highlyRatedFor: bookWithTags[0].highlyRatedFor,
@@ -207,6 +209,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
         if (input.performanceRating !== undefined) updateData.performanceRating = input.performanceRating;
         if (input.description !== undefined) updateData.description = input.description?.trim() || null;
         if (input.coverImageUrl !== undefined) updateData.coverImageUrl = input.coverImageUrl?.trim() || null;
+        if (input.audibleUrl !== undefined) updateData.audibleUrl = input.audibleUrl?.trim() || null;
         if (input.queuePosition !== undefined) updateData.queuePosition = input.queuePosition;
         if (input.highlyRatedFor !== undefined) updateData.highlyRatedFor = input.highlyRatedFor?.trim() || null;
 
@@ -283,6 +286,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
                 performanceRating: books.performanceRating,
                 description: books.description,
                 coverImageUrl: books.coverImageUrl,
+                audibleUrl: books.audibleUrl,
                 queuePosition: books.queuePosition,
                 dateAdded: books.dateAdded,
                 highlyRatedFor: books.highlyRatedFor,
@@ -304,6 +308,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
             performanceRating: updatedBookWithTags[0].performanceRating,
             description: updatedBookWithTags[0].description,
             coverImageUrl: updatedBookWithTags[0].coverImageUrl,
+            audibleUrl: updatedBookWithTags[0].audibleUrl,
             queuePosition: updatedBookWithTags[0].queuePosition,
             dateAdded: new Date(updatedBookWithTags[0].dateAdded),
             highlyRatedFor: updatedBookWithTags[0].highlyRatedFor,
