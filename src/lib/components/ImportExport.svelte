@@ -140,6 +140,12 @@
 			let existingBooks: ApiBook[] = [];
 			if (strategy !== 'replace') {
 				existingBooks = await apiClient.getBooks();
+			} else {
+				// For replace strategy, delete all existing books first
+				const existingBooks = await apiClient.getBooks();
+				for (const book of existingBooks) {
+					await apiClient.deleteBook(book.id);
+				}
 			}
 
 			// Process imported books
@@ -179,8 +185,8 @@
 					const bookToCreate = {
 						title: bookData.title.trim(),
 						author: bookData.author.trim(),
-						narratorRating: bookData.narratorRating || undefined,
 						performanceRating: bookData.performanceRating || undefined,
+						storyRating: bookData.storyRating || undefined,
 						description: bookData.description?.trim() || undefined,
 						coverImageUrl: bookData.coverImageUrl?.trim() || undefined,
 						audibleUrl: bookData.audibleUrl?.trim() || undefined,

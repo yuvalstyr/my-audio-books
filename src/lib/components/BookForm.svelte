@@ -19,7 +19,7 @@
     let author = "";
     let coverImageUrl = "";
     let audibleUrl = "";
-    let narratorRating: number | undefined = undefined;
+    let storyRating: number | undefined = undefined;
     let performanceRating: number | undefined = undefined;
     let description = "";
     let highlyRatedFor = "";
@@ -59,7 +59,7 @@
             author = book.author;
             coverImageUrl = book.coverImageUrl || "";
             audibleUrl = book.audibleUrl || "";
-            narratorRating = book.narratorRating;
+            storyRating = book.storyRating;
             performanceRating = book.performanceRating;
             description = book.description || "";
             highlyRatedFor = book.highlyRatedFor || "";
@@ -70,7 +70,7 @@
             author = "";
             coverImageUrl = "";
             audibleUrl = "";
-            narratorRating = undefined;
+            storyRating = undefined;
             performanceRating = undefined;
             description = "";
             highlyRatedFor = "";
@@ -95,10 +95,10 @@
 
         // Rating validation
         if (
-            narratorRating !== undefined &&
-            (narratorRating < 0 || narratorRating > 5)
+            storyRating !== undefined &&
+            (storyRating < 0 || storyRating > 5)
         ) {
-            errors.narratorRating = "Rating must be between 0 and 5";
+            errors.storyRating = "Rating must be between 0 and 5";
         }
 
         if (
@@ -150,11 +150,11 @@
                 author: author.trim(),
                 coverImageUrl: coverImageUrl.trim() || undefined,
                 audibleUrl: audibleUrl.trim() || undefined,
-                narratorRating:
-                    narratorRating !== undefined &&
-                    narratorRating !== null &&
-                    !isNaN(narratorRating)
-                        ? narratorRating
+                storyRating:
+                    storyRating !== undefined &&
+                    storyRating !== null &&
+                    !isNaN(storyRating)
+                        ? storyRating
                         : undefined,
                 performanceRating:
                     performanceRating !== undefined &&
@@ -429,19 +429,19 @@
 
                 <!-- Ratings Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Narrator Rating -->
+                    <!-- Story Rating -->
                     <div class="form-control">
-                        <label class="label" for="narratorRating">
+                        <label class="label" for="storyRating">
                             <span class="label-text font-medium"
-                                >Narrator Rating</span
+                                >Story Rating</span
                             >
                             <span class="label-text-alt">0-5</span>
                         </label>
                         <input
-                            id="narratorRating"
+                            id="storyRating"
                             type="number"
-                            bind:value={narratorRating}
-                            class="input input-bordered w-full {errors.narratorRating
+                            bind:value={storyRating}
+                            class="input input-bordered w-full {errors.storyRating
                                 ? 'input-error'
                                 : ''}"
                             placeholder="4.5"
@@ -450,10 +450,10 @@
                             step="0.1"
                             disabled={isSubmitting}
                         />
-                        {#if errors.narratorRating}
+                        {#if errors.storyRating}
                             <div class="label">
                                 <span class="label-text-alt text-error"
-                                    >{errors.narratorRating}</span
+                                    >{errors.storyRating}</span
                                 >
                             </div>
                         {/if}

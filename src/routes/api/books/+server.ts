@@ -44,8 +44,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
                 id: books.id,
                 title: books.title,
                 author: books.author,
-                narratorRating: books.narratorRating,
                 performanceRating: books.performanceRating,
+                storyRating: books.storyRating,
                 description: books.description,
                 coverImageUrl: books.coverImageUrl,
                 audibleUrl: books.audibleUrl,
@@ -82,8 +82,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
                     id: row.id,
                     title: row.title,
                     author: row.author,
-                    narratorRating: row.narratorRating,
                     performanceRating: row.performanceRating,
+                    storyRating: row.storyRating,
                     description: row.description,
                     coverImageUrl: row.coverImageUrl,
                     audibleUrl: row.audibleUrl,
@@ -170,7 +170,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
         ServerLogger.info('Creating new book', 'API_BOOKS_POST', requestId, {
             title: body?.title,
-            author: body?.author
+            author: body?.author,
+            performanceRating: body?.performanceRating,
+            storyRating: body?.storyRating
         });
 
         // Validate input
@@ -197,8 +199,8 @@ export const POST: RequestHandler = async ({ request }) => {
             id: bookId,
             title: input.title.trim(),
             author: input.author.trim(),
-            narratorRating: input.narratorRating || null,
             performanceRating: input.performanceRating || null,
+            storyRating: input.storyRating || null,
             description: input.description?.trim() || null,
             coverImageUrl: input.coverImageUrl?.trim() || null,
             audibleUrl: input.audibleUrl?.trim() || null,
@@ -249,8 +251,8 @@ export const POST: RequestHandler = async ({ request }) => {
                 id: books.id,
                 title: books.title,
                 author: books.author,
-                narratorRating: books.narratorRating,
                 performanceRating: books.performanceRating,
+                storyRating: books.storyRating,
                 description: books.description,
                 coverImageUrl: books.coverImageUrl,
                 audibleUrl: books.audibleUrl,
@@ -275,8 +277,8 @@ export const POST: RequestHandler = async ({ request }) => {
             id: createdBookWithTags[0].id,
             title: createdBookWithTags[0].title,
             author: createdBookWithTags[0].author,
-            narratorRating: createdBookWithTags[0].narratorRating,
             performanceRating: createdBookWithTags[0].performanceRating,
+            storyRating: createdBookWithTags[0].storyRating,
             description: createdBookWithTags[0].description,
             coverImageUrl: createdBookWithTags[0].coverImageUrl,
             audibleUrl: createdBookWithTags[0].audibleUrl,

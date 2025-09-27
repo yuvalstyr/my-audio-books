@@ -5,8 +5,8 @@ export const books = sqliteTable('books', {
     id: text('id').primaryKey(),
     title: text('title').notNull(),
     author: text('author').notNull(),
-    narratorRating: real('narrator_rating'),
     performanceRating: real('performance_rating'),
+    storyRating: real('story_rating'),
     description: text('description'),
     coverImageUrl: text('cover_image_url'),
     audibleUrl: text('audible_url'),
@@ -23,7 +23,7 @@ export const books = sqliteTable('books', {
     titleAuthorIdx: index('books_title_author_idx').on(table.title, table.author),
     dateAddedTitleIdx: index('books_date_added_title_idx').on(table.dateAdded, table.title),
     // Partial indexes for performance
-    ratedBooksIdx: index('books_rated_idx').on(table.narratorRating).where(sql`narrator_rating IS NOT NULL`),
+    ratedBooksIdx: index('books_rated_idx').on(table.performanceRating).where(sql`performance_rating IS NOT NULL`),
 }));
 
 export const tags = sqliteTable('tags', {

@@ -79,11 +79,11 @@ export function createFilteredBooks(books: Book[]) {
                     case 'dateAdded':
                         comparison = new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime();
                         break;
-                    case 'narratorRating':
-                        comparison = (a.narratorRating || 0) - (b.narratorRating || 0);
-                        break;
                     case 'performanceRating':
                         comparison = (a.performanceRating || 0) - (b.performanceRating || 0);
+                        break;
+                    case 'storyRating':
+                        comparison = (a.storyRating || 0) - (b.storyRating || 0);
                         break;
                 }
 

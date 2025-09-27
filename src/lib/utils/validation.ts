@@ -46,8 +46,13 @@ export function isValidBook(book: any): book is Book {
     }
 
 
-    if (book.narratorRating !== undefined &&
-        (typeof book.narratorRating !== 'number' || book.narratorRating < 0 || book.narratorRating > 5)) {
+    if (book.performanceRating !== undefined &&
+        (typeof book.performanceRating !== 'number' || book.performanceRating < 0 || book.performanceRating > 5)) {
+        return false;
+    }
+
+    if (book.storyRating !== undefined &&
+        (typeof book.storyRating !== 'number' || book.storyRating < 0 || book.storyRating > 5)) {
         return false;
     }
 
@@ -149,15 +154,15 @@ export function isValidCreateBookInput(input: any): input is CreateBookInput {
     }
 
     // Rating validation - allow null, undefined, or valid numbers
-    if (input.narratorRating !== undefined && input.narratorRating !== null &&
-        (typeof input.narratorRating !== 'number' || isNaN(input.narratorRating) || input.narratorRating < 0 || input.narratorRating > 5)) {
-        console.error('Validation failed: narratorRating invalid', input.narratorRating, typeof input.narratorRating);
-        return false;
-    }
-
     if (input.performanceRating !== undefined && input.performanceRating !== null &&
         (typeof input.performanceRating !== 'number' || isNaN(input.performanceRating) || input.performanceRating < 0 || input.performanceRating > 5)) {
         console.error('Validation failed: performanceRating invalid', input.performanceRating, typeof input.performanceRating);
+        return false;
+    }
+
+    if (input.storyRating !== undefined && input.storyRating !== null &&
+        (typeof input.storyRating !== 'number' || isNaN(input.storyRating) || input.storyRating < 0 || input.storyRating > 5)) {
+        console.error('Validation failed: storyRating invalid', input.storyRating, typeof input.storyRating);
         return false;
     }
 
@@ -187,7 +192,12 @@ export function isValidCreateBookInput(input: any): input is CreateBookInput {
         return false;
     }
 
-    console.log('Validation passed for CreateBookInput:', input);
+    console.log('Validation passed for CreateBookInput:', {
+        title: input.title,
+        performanceRating: input.performanceRating,
+        storyRating: input.storyRating,
+        hasStoryRating: 'storyRating' in input
+    });
     return true;
 }
 
@@ -221,13 +231,13 @@ export function isValidUpdateBookInput(input: any): boolean {
         }
     }
 
-    if (input.narratorRating !== undefined && input.narratorRating !== null &&
-        (typeof input.narratorRating !== 'number' || isNaN(input.narratorRating) || input.narratorRating < 0 || input.narratorRating > 5)) {
+    if (input.performanceRating !== undefined && input.performanceRating !== null &&
+        (typeof input.performanceRating !== 'number' || isNaN(input.performanceRating) || input.performanceRating < 0 || input.performanceRating > 5)) {
         return false;
     }
 
-    if (input.performanceRating !== undefined && input.performanceRating !== null &&
-        (typeof input.performanceRating !== 'number' || isNaN(input.performanceRating) || input.performanceRating < 0 || input.performanceRating > 5)) {
+    if (input.storyRating !== undefined && input.storyRating !== null &&
+        (typeof input.storyRating !== 'number' || isNaN(input.storyRating) || input.storyRating < 0 || input.storyRating > 5)) {
         return false;
     }
 

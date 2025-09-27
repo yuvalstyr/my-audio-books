@@ -144,3 +144,4 @@ Primary deployment target is Railway with Docker. The `railway.json` configures 
 
 ### Database Operations
 Always use Drizzle ORM with the connection from `src/lib/server/db/index.ts`. Prefer parameterized queries and leverage the type-safe query builder.
+- don't add console.log for debuging add real log

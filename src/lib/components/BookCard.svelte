@@ -52,7 +52,7 @@
   }
 
   $: hasNextTag = book.tags.some((tag) => tag.name === "next");
-  $: hasRatings = book.narratorRating || book.performanceRating;
+  $: hasRatings = book.performanceRating || book.storyRating;
   $: hasHighlyRated =
     book.highlyRatedFor && formatHighlyRatedFor(book.highlyRatedFor).length > 0;
 </script>
@@ -360,18 +360,18 @@
     <!-- Ratings (Always Visible if Present) -->
     {#if hasRatings}
       <div class="space-y-3">
-        {#if book.narratorRating}
+        {#if book.performanceRating}
           <div class="flex items-center gap-3">
             <span
               class="text-gray-600 dark:text-base-content/60 text-sm font-medium min-w-[70px]"
-              >Narrator:</span
+              >Performance:</span
             >
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-0.5">
                 {#each Array(5) as _, i}
                   <div
                     class="w-4 h-4 mask mask-star-2 {i <
-                    Math.round(book.narratorRating || 0)
+                    Math.round(book.performanceRating || 0)
                       ? 'bg-warning'
                       : 'bg-base-300'}"
                   ></div>
@@ -379,13 +379,13 @@
               </div>
               <span
                 class="text-sm font-semibold text-gray-700 dark:text-base-content/80"
-                >{formatRating(book.narratorRating)}/5</span
+                >{formatRating(book.performanceRating)}/5</span
               >
             </div>
           </div>
         {/if}
 
-        {#if book.performanceRating}
+        {#if book.storyRating}
           <div class="flex items-center gap-3">
             <span
               class="text-gray-600 dark:text-base-content/60 text-sm font-medium min-w-[70px]"
@@ -396,7 +396,7 @@
                 {#each Array(5) as _, i}
                   <div
                     class="w-4 h-4 mask mask-star-2 {i <
-                    Math.round(book.performanceRating || 0)
+                    Math.round(book.storyRating || 0)
                       ? 'bg-info'
                       : 'bg-base-300'}"
                   ></div>
@@ -404,7 +404,7 @@
               </div>
               <span
                 class="text-sm font-semibold text-gray-700 dark:text-base-content/80"
-                >{formatRating(book.performanceRating)}/5</span
+                >{formatRating(book.storyRating)}/5</span
               >
             </div>
           </div>

@@ -21,8 +21,8 @@
             { value: "dateAdded", label: "Date Added" },
             { value: "title", label: "Title" },
             { value: "author", label: "Author" },
-            { value: "narratorRating", label: "Narrator Rating" },
             { value: "performanceRating", label: "Performance Rating" },
+            { value: "storyRating", label: "Story Rating" },
         ];
 
     let showFilters = hideFilterToggle ? true : false; // Always show filters when hideFilterToggle is true

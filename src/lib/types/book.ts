@@ -7,8 +7,8 @@ export interface Book {
     title: string;
     author: string;
     tags: BookTag[];
-    narratorRating?: number;
     performanceRating?: number;
+    storyRating?: number;
     dateAdded: Date;
     queuePosition?: number;
     coverImageUrl?: string;
@@ -32,7 +32,7 @@ export interface WishlistState {
 export interface FilterState {
     searchQuery: string;
     selectedTags: string[];
-    sortBy: 'dateAdded' | 'title' | 'author' | 'narratorRating' | 'performanceRating';
+    sortBy: 'dateAdded' | 'title' | 'author' | 'performanceRating' | 'storyRating';
     sortOrder: 'asc' | 'desc';
 }
 
@@ -46,8 +46,8 @@ export interface CreateBookInput {
     title: string;
     author: string;
     tags?: BookTag[];
-    narratorRating?: number;
     performanceRating?: number;
+    storyRating?: number;
     queuePosition?: number;
     coverImageUrl?: string;
     audibleUrl?: string;

@@ -49,8 +49,8 @@ export const GET: RequestHandler = async ({ params, request }) => {
                 id: books.id,
                 title: books.title,
                 author: books.author,
-                narratorRating: books.narratorRating,
                 performanceRating: books.performanceRating,
+                storyRating: books.storyRating,
                 description: books.description,
                 coverImageUrl: books.coverImageUrl,
                 audibleUrl: books.audibleUrl,
@@ -85,8 +85,8 @@ export const GET: RequestHandler = async ({ params, request }) => {
             id: bookWithTags[0].id,
             title: bookWithTags[0].title,
             author: bookWithTags[0].author,
-            narratorRating: bookWithTags[0].narratorRating,
             performanceRating: bookWithTags[0].performanceRating,
+            storyRating: bookWithTags[0].storyRating,
             description: bookWithTags[0].description,
             coverImageUrl: bookWithTags[0].coverImageUrl,
             audibleUrl: bookWithTags[0].audibleUrl,
@@ -205,8 +205,8 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
         if (input.title !== undefined) updateData.title = input.title.trim();
         if (input.author !== undefined) updateData.author = input.author.trim();
-        if (input.narratorRating !== undefined) updateData.narratorRating = input.narratorRating;
         if (input.performanceRating !== undefined) updateData.performanceRating = input.performanceRating;
+        if (input.storyRating !== undefined) updateData.storyRating = input.storyRating;
         if (input.description !== undefined) updateData.description = input.description?.trim() || null;
         if (input.coverImageUrl !== undefined) updateData.coverImageUrl = input.coverImageUrl?.trim() || null;
         if (input.audibleUrl !== undefined) updateData.audibleUrl = input.audibleUrl?.trim() || null;
@@ -282,8 +282,8 @@ export const PUT: RequestHandler = async ({ params, request }) => {
                 id: books.id,
                 title: books.title,
                 author: books.author,
-                narratorRating: books.narratorRating,
                 performanceRating: books.performanceRating,
+                storyRating: books.storyRating,
                 description: books.description,
                 coverImageUrl: books.coverImageUrl,
                 audibleUrl: books.audibleUrl,
@@ -304,8 +304,8 @@ export const PUT: RequestHandler = async ({ params, request }) => {
             id: updatedBookWithTags[0].id,
             title: updatedBookWithTags[0].title,
             author: updatedBookWithTags[0].author,
-            narratorRating: updatedBookWithTags[0].narratorRating,
             performanceRating: updatedBookWithTags[0].performanceRating,
+            storyRating: updatedBookWithTags[0].storyRating,
             description: updatedBookWithTags[0].description,
             coverImageUrl: updatedBookWithTags[0].coverImageUrl,
             audibleUrl: updatedBookWithTags[0].audibleUrl,
