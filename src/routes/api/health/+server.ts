@@ -15,6 +15,10 @@ export const GET: RequestHandler = async ({ request, url }) => {
 
     try {
         ServerLogger.info('Health check requested', 'HEALTH_CHECK', requestId);
+        console.log('🏥 Health check endpoint called');
+        console.log('🌍 Environment:', process.env.NODE_ENV);
+        console.log('🗃️ Database path:', process.env.DATABASE_PATH || 'Not set');
+        console.log('🎯 Railway volume path:', process.env.RAILWAY_VOLUME_MOUNT_PATH || 'Not set');
 
         const startTime = Date.now();
 
@@ -23,6 +27,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
         let dbStats = { isConnected: false, error: 'Not checked' };
 
         try {
+            console.log('🔍 Starting database health checks...');
             // Add timeout to database operations
             const dbPromise = Promise.all([
                 validateDatabaseConnection(),
@@ -33,10 +38,13 @@ export const GET: RequestHandler = async ({ request, url }) => {
                 setTimeout(() => reject(new Error('Database check timeout')), 5000);
             });
 
+            console.log('⏱️ Running database operations with 5s timeout...');
             const [connected, stats] = await Promise.race([dbPromise, timeoutPromise]);
             dbConnected = connected;
             dbStats = stats;
+            console.log('✅ Database health check completed:', { connected: dbConnected, stats });
         } catch (error) {
+            console.log('❌ Database health check failed:', (error as Error).message);
             ServerLogger.warn('Database health check failed or timed out', 'HEALTH_CHECK', requestId, { error: (error as Error).message });
             dbStats = { isConnected: false, error: (error as Error).message };
         }
@@ -233,17 +241,21 @@ export const POST: RequestHandler = async ({ request }) => {
 // Helper functions to replace the deleted database utils
 async function validateDatabaseConnection(): Promise<boolean> {
     try {
+        console.log('🔗 Testing database connection...');
         // Use a simpler query that's guaranteed to work
         const result = await db.select().from(books).limit(1);
+        console.log('✅ Database connection successful, query returned:', result.length, 'rows');
         return true;
     } catch (error) {
         console.error('❌ Database validation failed:', (error as Error).message);
+        console.error('❌ Database error stack:', (error as Error).stack);
         return false;
     }
 }
 
 async function getDatabaseStats() {
     try {
+        console.log('📊 Getting database statistics...');
         const [booksCount, tagsCount, bookTagsCount] = await Promise.all([
             db.select({ count: sql<number>`count(*)` }).from(books),
             db.select({ count: sql<number>`count(*)` }).from(tags),
@@ -252,6 +264,13 @@ async function getDatabaseStats() {
 
         const totalRecords = (booksCount[0]?.count || 0) + (tagsCount[0]?.count || 0) + (bookTagsCount[0]?.count || 0);
 
+        console.log('📊 Database stats:', {
+            books: booksCount[0]?.count || 0,
+            tags: tagsCount[0]?.count || 0,
+            bookTags: bookTagsCount[0]?.count || 0,
+            total: totalRecords
+        });
+
         return {
             isConnected: true,
             tableCount: 3,
@@ -259,6 +278,7 @@ async function getDatabaseStats() {
             error: null
         };
     } catch (error) {
+        console.error('❌ Database stats failed:', (error as Error).message);
         return {
             isConnected: false,
             tableCount: 0,
